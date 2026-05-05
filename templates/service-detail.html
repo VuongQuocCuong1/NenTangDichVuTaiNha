@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết dịch vụ</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .detail-container { max-width: 800px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .detail-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; }
+        .detail-icon { font-size: 4rem; }
+        .price-tag { font-size: 1.5rem; color: #2563eb; font-weight: bold; margin: 1rem 0; }
+        .booking-card { border-top: 2px solid #f3f4f6; padding-top: 2rem; margin-top: 2rem; }
+        .btn-back { color: #6b7280; text-decoration: none; display: inline-block; margin-bottom: 1rem; }
+        .btn-submit { background-color: #2563eb; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body style="display: block; background: #f9fafb;">
+
+    <div class="detail-container">
+        <!-- Sửa link quay lại -->
+        <a href="/" class="btn-back">&larr; Quay lại trang chủ</a>
+        
+        <div id="serviceDetail">
+            <p>Đang tải dữ liệu...</p>
+        </div>
+
+        <div class="booking-card">
+            <h3>Đặt lịch dịch vụ này</h3>
+            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 1rem;">Vui lòng đăng nhập để tiến hành đặt lịch.</p>
+            <button onclick="checkAuthAndBook()" class="btn-submit">Tiến hành đặt lịch</button>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const serviceId = urlParams.get('id');
+
+        async function loadDetail() {
+            try {
+                const response = await fetch('/api/services');
+                const services = await response.json();
+                const service = services.find(s => s.service_id == serviceId);
+
+                if (service) {
+                    // Định dạng giá
+                    const formattedPrice = Number(service.price_range).toLocaleString('vi-VN');
+                    document.getElementById('serviceDetail').innerHTML = `
+                        <div class="detail-header">
+                            <div class="detail-icon">${service.icon || '🛠️'}</div>
+                            <div>
+                                <h1 style="margin:0;">${service.name}</h1>
+                                <div class="price-tag">${formattedPrice} đ</div>
+                            </div>
+                        </div>
+                        <p style="line-height: 1.6; color: #4b5563;">${service.description}</p>
+                    `;
+                    document.title = service.name + " - NTDVhome";
+                }
+            } catch (error) {
+                console.error("Lỗi:", error);
+            }
+        }
+
+        function checkAuthAndBook() {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                alert("Vui lòng đăng nhập để đặt lịch!");
+                // Sửa lệnh chuyển hướng thành /login
+                window.location.href = '/login';
+            } else {
+                // Sửa lệnh chuyển hướng thành /booking
+                window.location.href = `/booking?id=${serviceId}`;
+            }
+        }
+
+        loadDetail();
+    </script>
+</body>
+</html>

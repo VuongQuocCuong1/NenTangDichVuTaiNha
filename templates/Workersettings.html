@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cài đặt - Thợ NTDVhome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS CHUNG */
+        :root { --primary: #0f52ba; --primary-dark: #0a3d8f; --accent: #ff6b35; --accent-2: #00c896; --bg: #f0f4ff; --text: #0d1b2a; --text-muted: #5a6a7a; --border: #e2e8f0; --shadow: 0 4px 24px rgba(15,82,186,0.10); }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: block; min-height: 100vh; }
+        .worker-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #0f52ba, #0a3d8f); padding: 2rem 1.5rem; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+        .sidebar-logo { font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 700; color: white; margin-bottom: 0.25rem; }
+        .sidebar-logo span { color: #fbbf24; }
+        .sidebar-role { color: #93c5fd; font-size: 0.8rem; margin-bottom: 2.5rem; }
+        .sidebar-worker { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px; margin-bottom: 2rem; }
+        .sw-avatar { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .sw-name { color: white; font-weight: 700; font-size: 0.9rem; }
+        .sw-status { color: #86efac; font-size: 0.75rem; }
+        .sidebar-nav { flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 10px; margin-bottom: 0.25rem; color: #93c5fd; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: rgba(255,255,255,0.15); color: white; font-weight: 700; }
+        .sidebar-footer { margin-top: auto; }
+        .btn-logout-side { width: 100%; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 0.75rem; border-radius: 10px; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-logout-side:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .main { margin-left: 260px; padding: 2rem; flex: 1; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .page-title { font-family: 'Sora', sans-serif; font-size: 1.6rem; font-weight: 700; }
+        .page-sub { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } }
+
+        /* SETTINGS STYLES */
+        .settings-card { background: white; border-radius: 16px; padding: 2rem; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+        .settings-group { margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid #f1f5f9; }
+        .settings-group:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .settings-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; }
+        .toggle-label { font-weight: 500; font-size: 0.95rem; color: var(--text); }
+        .toggle-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+        
+        /* Toggle Switch CSS */
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(24px); }
+    </style>
+</head>
+<body>
+<div class="worker-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">NTDV<span>·</span>home</div>
+        <div class="sidebar-role">🛠️ Cổng thông tin Thợ</div>
+
+        <div class="sidebar-worker">
+            <div class="sw-avatar">👷</div>
+            <div>
+                <div class="sw-name">Đang tải...</div>
+                <div class="sw-status">🟢 Đang hoạt động</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a class="nav-item" href="/worker/orders">📋 Đơn hàng của tôi</a>
+            <a class="nav-item" href="/worker/location">📍 Vị trí của tôi</a>
+            <a class="nav-item" href="/worker/income">📊 Thu nhập</a>
+            <a class="nav-item" href="/worker/reviews">⭐ Đánh giá</a>
+            <a class="nav-item" href="/profile">👤 Hồ sơ</a>
+            <a class="nav-item" href="/worker/notifications">🔔 Thông báo</a>
+            <a class="nav-item active" href="/worker/settings">⚙️ Cài đặt</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout-side" onclick="window.location.href='/'">← Về trang chủ</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">⚙️ Cài đặt</div>
+                <div class="page-sub">Tùy chỉnh hệ thống và nhận thông báo</div>
+            </div>
+        </div>
+
+        <div class="settings-card">
+            <div class="settings-group">
+                <div class="settings-title">🔔 Thông báo ứng dụng</div>
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">Thông báo đẩy (Push Notifications)</div>
+                        <div class="toggle-desc">Nhận thông báo ngay khi có khách hàng đặt dịch vụ</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">Âm báo khi có đơn mới</div>
+                        <div class="toggle-desc">Phát âm thanh chuông báo khi có đơn hàng vào</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-title">📱 Giao diện & Ngôn ngữ</div>
+                <div class="toggle-row">
+                    <div>
+                        <div class="toggle-label">Chế độ tối (Dark Mode)</div>
+                        <div class="toggle-desc">Sử dụng nền tối để bảo vệ mắt</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <div class="settings-title">🔐 Bảo mật</div>
+                <button style="padding: 0.7rem 1.2rem; background: #f1f5f9; border: none; border-radius: 8px; font-weight: 600; color: var(--text); cursor: pointer; transition: 0.2s;">Thay đổi mật khẩu</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (!userInfoStr) { window.location.href = '/login'; return; }
+        const u = JSON.parse(userInfoStr);
+        try {
+            const resProv = await fetch('/api/admin/providers');
+            const providers = await resProv.json();
+            const currentProvider = providers.find(p => p.phone === u.phone && p.verified === true);
+            if (currentProvider) {
+                document.querySelector('.sw-name').innerText = currentProvider.name;
+                if (currentProvider.avatar) { document.querySelector('.sw-avatar').innerHTML = `<img src="${currentProvider.avatar}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`; }
+            }
+        } catch (error) { console.error("Lỗi:", error); }
+    });
+</script>
+</body>
+</html>

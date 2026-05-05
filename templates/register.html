@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký tài khoản</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .alert-error {
+            background-color: #fee2e2;
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            border: 1px solid #f87171;
+            display: none;
+        }
+        .alert-error.show { display: block; }
+    </style>
+</head>
+<body class="auth-page">
+
+    <div class="auth-card">
+        <h2 class="auth-title">Tạo tài khoản</h2>
+        <div id="errorBox" class="alert-error"></div>
+
+        <form id="registerForm">
+            <div class="input-group">
+                <label for="fullName">Họ và tên</label>
+                <input type="text" id="fullName" required placeholder="Nhập họ và tên">
+            </div>
+            <div class="input-group">
+                <label for="phone">Số điện thoại</label>
+                <input type="tel" id="phone" required placeholder="Ví dụ: 0912345678">
+            </div>
+            <div class="input-group">
+                <label for="email">Địa chỉ Email</label>
+                <input type="text" id="email" required placeholder="Ví dụ: nguyenvan@gmail.com">
+            </div>
+            <div class="input-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" id="password" required placeholder="Ít nhất 6 ký tự, gồm chữ và số">
+            </div>
+            <div class="input-group">
+                <label for="confirmPassword">Nhập lại mật khẩu</label>
+                <input type="password" id="confirmPassword" required placeholder="Xác nhận lại mật khẩu">
+            </div>
+            <button type="submit" class="btn-submit">Đăng ký ngay</button>
+        </form>
+
+        <div class="auth-footer" style="display: flex; justify-content: center;">
+            <!-- Sửa href thành /login -->
+            <span>Đã có tài khoản? <a href="/login">Đăng nhập ngay</a></span>
+        </div>
+    </div>
+
+   <script>
+    const form = document.getElementById('registerForm');
+    const errorBox = document.getElementById('errorBox');
+
+    function showError(message) {
+        errorBox.innerText = message;
+        errorBox.classList.add('show');
+    }
+
+    form.addEventListener('submit', async function(event) {
+        event.preventDefault(); 
+        errorBox.classList.remove('show');
+        errorBox.innerText = '';
+
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        const phoneRegex = /^0\d{9}$/;
+        if (!phoneRegex.test(phone)) {
+            showError('Số điện thoại không hợp lệ! Vui lòng nhập 10 số bắt đầu bằng 0.');
+            return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showError('Địa chỉ Email không đúng định dạng!');
+            return;
+        }
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/;
+        if (!passwordRegex.test(password)) {
+            showError('Mật khẩu quá yếu! Phải có ít nhất 6 ký tự, bao gồm cả chữ và số.');
+            return;
+        }
+        if (password !== confirmPassword) {
+            showError('Mật khẩu nhập lại không khớp!');
+            return;
+        }
+
+        const formData = { fullName: document.getElementById('fullName').value, phone, email, password };
+
+        try {
+            const submitBtn = document.querySelector('.btn-submit');
+            const originalBtnText = submitBtn.innerText;
+            submitBtn.innerText = 'Đang xử lý...';
+            submitBtn.disabled = true;
+
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+            submitBtn.innerText = originalBtnText;
+            submitBtn.disabled = false;
+
+            if (response.ok) {
+                alert('🎉 ' + result.message);
+                // Sửa lệnh chuyển hướng thành /login
+                window.location.href = '/login'; 
+            } else {
+                showError(result.message);
+            }
+        } catch (error) {
+            showError('Không thể kết nối đến máy chủ. Vui lòng đảm bảo Backend đang chạy!');
+        }
+    });
+</script>
+</body>
+</html>

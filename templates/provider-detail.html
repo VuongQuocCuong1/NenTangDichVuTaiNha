@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ thợ & Đánh giá</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .detail-container { max-width: 800px; margin: 2rem auto; padding: 2rem; background: #fff; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .detail-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .detail-avatar { font-size: 5rem; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; background: #eff6ff; border-radius: 50%; border: 3px solid #2563eb; }
+        .detail-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .price-tag { font-size: 1.5rem; color: #2563eb; font-weight: bold; margin: 0.5rem 0; }
+        .booking-card { border-top: 2px solid #f3f4f6; padding-top: 2rem; margin-top: 2rem; }
+        .btn-back { color: #6b7280; text-decoration: none; display: inline-block; margin-bottom: 1rem; }
+        .btn-submit { background-color: #2563eb; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .btn-submit:hover { background-color: #1d4ed8; }
+        
+        .reviews-section { margin-top: 2rem; border-top: 2px solid #f3f4f6; padding-top: 1.5rem; }
+        .review-item { background: #f9fafb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1rem; }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .reviewer-name { font-weight: bold; color: #111827; }
+        .review-stars { color: #f59e0b; font-size: 1.1rem; }
+        .review-comment { color: #4b5563; line-height: 1.5; font-size: 0.95rem; }
+    </style>
+</head>
+<body style="display: block; background: #f9fafb;">
+
+    <div class="detail-container">
+        <a href="/" class="btn-back">&larr; Quay lại trang chủ</a>
+        
+        <div id="providerDetail">
+            <p>Đang tải dữ liệu hồ sơ thợ...</p>
+        </div>
+
+        <div class="reviews-section" id="reviewsSection">
+            <h3 style="margin-bottom: 1rem;">Đánh giá từ khách hàng</h3>
+            <div id="reviewsList">
+                <p style="color: #6b7280;">Đang tải đánh giá...</p>
+            </div>
+        </div>
+
+        <div class="booking-card">
+            <h3>Đặt lịch với thợ này</h3>
+            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 1rem;">Vui lòng đăng nhập và chọn dịch vụ phù hợp để tiến hành đặt lịch.</p>
+            <button onclick="checkAuthAndBook()" class="btn-submit">Chuyển đến trang Đặt lịch</button>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const providerId = urlParams.get('id'); // ID thật
+        const fpId = urlParams.get('fp_id'); // ID đề xuất (Quảng cáo)
+
+        async function loadProviderDetail() {
+            if (!providerId && !fpId) {
+                document.getElementById('providerDetail').innerHTML = '<p style="color:red;">Lỗi: Không tìm thấy ID thợ.</p>';
+                return;
+            }
+
+            try {
+                let provider = null;
+                
+                // Nếu gọi theo ID thật
+                if (providerId) {
+                    const res = await fetch(`/api/public/providers/${providerId}`);
+                    if (res.ok) provider = await res.json();
+                } 
+                // Nếu gọi theo ID Đề xuất / Quảng cáo (fp_id)
+                else if (fpId) {
+                    const res = await fetch(`/api/featured-providers`);
+                    if (res.ok) {
+                        const fps = await res.json();
+                        const fp = fps.find(x => x.id == fpId);
+                        if (fp) {
+                            provider = {
+                                name: fp.provider_name,
+                                avatar: fp.avatar_icon,
+                                bio: fp.description + (fp.tags ? ' | Chuyên môn: ' + fp.tags : ''),
+                                verified: true,
+                                avg_rating: fp.rating,
+                                review_count: fp.review_count,
+                                book_url: fp.service_link // Dùng link dịch vụ của thẻ này
+                            };
+                        }
+                    }
+                }
+
+                if (!provider) throw new Error("Không tìm thấy thợ");
+                
+                let avatarHtml = provider.avatar && provider.avatar.startsWith('/') 
+                    ? `<img src="${provider.avatar}" alt="Avatar">`
+                    : provider.avatar;
+
+                document.getElementById('providerDetail').innerHTML = `
+                    <div class="detail-header">
+                        <div class="detail-avatar">${avatarHtml}</div>
+                        <div>
+                            <h1 style="margin:0; display:flex; align-items:center; gap:0.5rem;">
+                                ${provider.name} 
+                                ${provider.verified ? '<span style="color:#10b981; font-size:1.2rem;" title="Đã xác minh">✔️</span>' : ''}
+                            </h1>
+                            <div class="review-stars" style="margin-top:0.25rem;">
+                                ${'★'.repeat(Math.round(provider.avg_rating))}${'☆'.repeat(5 - Math.round(provider.avg_rating))}
+                                <span style="color:#6b7280; font-size:0.9rem;">(${provider.review_count} đánh giá)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom:0.5rem;">Kinh nghiệm / Giới thiệu:</h4>
+                        <p style="line-height: 1.6; color: #4b5563; background:#f3f4f6; padding:1rem; border-radius:0.5rem;">${provider.bio || 'Thợ chưa cập nhật tiểu sử.'}</p>
+                    </div>
+                `;
+                document.title = "Hồ sơ thợ: " + provider.name;
+                
+                // Lưu lại URL đặt lịch nếu có
+                if(provider.book_url) {
+                    window.currentBookUrl = provider.book_url;
+                }
+
+                // Tải đánh giá (Chỉ khi có providerId thật)
+                if (providerId) {
+                    loadProviderReviews();
+                } else {
+                    document.getElementById('reviewsList').innerHTML = '<p style="color: #6b7280; font-style:italic;">Chưa có đánh giá chi tiết cho thợ đề xuất này.</p>';
+                }
+
+            } catch (error) {
+                document.getElementById('providerDetail').innerHTML = '<p style="color:red;">Lỗi tải dữ liệu hoặc thợ không tồn tại.</p>';
+                document.getElementById('reviewsSection').style.display = 'none';
+            }
+        }
+
+        async function loadProviderReviews() {
+            try {
+                const res = await fetch(`/api/public/providers/${providerId}/reviews`);
+                const reviews = await res.json();
+                
+                const listEl = document.getElementById('reviewsList');
+                if (reviews.length === 0) {
+                    listEl.innerHTML = '<p style="color: #6b7280; font-style:italic;">Thợ này chưa có đánh giá nào.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = reviews.map(r => `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer-name">${r.customer}</div>
+                            <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>
+                        </div>
+                        <div class="review-comment">"${r.comment}"</div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error("Lỗi tải đánh giá", e);
+            }
+        }
+
+        function checkAuthAndBook() {
+            const token = localStorage.getItem('userToken');
+            if (!token) {
+                alert("Vui lòng đăng nhập để đặt lịch!");
+                window.location.href = '/login';
+            } else {
+                let bookUrl = window.currentBookUrl || urlParams.get('book_url') || '/';
+                
+                // Xử lý một số URL cũ bị lỗi
+                if(bookUrl === '/service-detail') {
+                    bookUrl = '/'; // Fallback an toàn
+                }
+                
+                if(bookUrl !== '/') {
+                    // Nối thêm preselect_worker vào URL (Ưu tiên ID thật, nếu ko thì dùng FP ID)
+                    const separator = bookUrl.includes('?') ? '&' : '?';
+                    bookUrl += separator + 'preselect_worker=' + (providerId || fpId || '');
+                } else {
+                    alert("Hệ thống sẽ chuyển bạn về trang chủ để chọn Dịch vụ muốn đặt.");
+                }
+                
+                window.location.href = bookUrl;
+            }
+        }
+
+        loadProviderDetail();
+    </script>
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cộng đồng NTDVhome - Chia sẻ kinh nghiệm</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f52ba; --primary-light: #3b7de8; --accent: #ff6b35;
+            --bg: #f0f4ff; --surface: #ffffff; --text: #0d1b2a;
+            --text-muted: #5a6a7a; --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(15,82,186,0.10);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+        /* NAVBAR */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; height: 68px;
+            background: rgba(255,255,255,0.97); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border); box-shadow: 0 2px 12px rgba(15,82,186,0.07);
+        }
+        .nav-logo { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .nav-logo span { color: #ff6b35; }
+        .nav-links { display: flex; align-items: center; gap: 1rem; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; padding: 0.4rem 0.8rem; border-radius: 8px; transition: all 0.2s; }
+        .nav-links a:hover, .nav-links a.active { background: #eff6ff; color: var(--primary); }
+        .nav-user { display: flex; align-items: center; gap: 0.75rem; }
+        .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.9rem; }
+
+        /* LAYOUT */
+        .page-layout {
+            max-width: 680px; margin: 2rem auto; padding: 0 1rem;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            background: linear-gradient(135deg, #0f52ba, #1e6fe4);
+            border-radius: 20px; padding: 2rem 2.5rem; margin-bottom: 1.5rem;
+            color: white; position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content: '💬'; position: absolute; right: 2rem; top: 50%;
+            transform: translateY(-50%); font-size: 5rem; opacity: 0.15;
+        }
+        .page-header h1 { font-family: 'Sora', sans-serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 0.4rem; }
+        .page-header p { color: #bfdbfe; font-size: 0.9rem; }
+
+        /* COMPOSE BOX */
+        .compose-box {
+            background: white; border-radius: 16px; padding: 1.25rem;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 1.25rem;
+        }
+        .compose-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .compose-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; flex-shrink: 0; }
+        .compose-input {
+            flex: 1; border: 1.5px solid var(--border); border-radius: 24px;
+            padding: 0.7rem 1.2rem; font-family: inherit; font-size: 0.95rem;
+            color: var(--text); resize: none; outline: none; transition: border-color 0.2s;
+            min-height: 44px; line-height: 1.5;
+        }
+        .compose-input:focus { border-color: var(--primary); }
+        .compose-input::placeholder { color: #94a3b8; }
+        .compose-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 0.75rem; }
+        .compose-media-btns { display: flex; gap: 0.5rem; }
+        .btn-media {
+            background: #f1f5f9; border: 1.5px solid var(--border); color: var(--text-muted);
+            border-radius: 8px; padding: 0.45rem 0.9rem; font-family: inherit; font-size: 0.82rem;
+            font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.4rem;
+        }
+        .btn-media:hover { background: #eff6ff; color: var(--primary); border-color: var(--primary); }
+        .media-preview {
+            margin-top: 0.75rem; border-radius: 12px; overflow: hidden;
+            border: 1.5px solid var(--border); position: relative; display: none;
+        }
+        .media-preview img, .media-preview video { width: 100%; max-height: 360px; object-fit: cover; display: block; }
+        .btn-remove-media {
+            position: absolute; top: 0.5rem; right: 0.5rem;
+            background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%;
+            width: 28px; height: 28px; cursor: pointer; font-size: 0.8rem; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .post-media { width: 100%; max-height: 480px; object-fit: cover; display: block; border-top: 1px solid var(--border); }
+        .btn-post {
+            background: linear-gradient(135deg, #0f52ba, #1a6fd4);
+            color: white; border: none; border-radius: 10px;
+            padding: 0.6rem 1.5rem; font-family: inherit; font-weight: 700; font-size: 0.9rem;
+            cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(15,82,186,0.3);
+        }
+        .btn-post:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(15,82,186,0.4); }
+        .btn-post:disabled { background: #94a3b8; box-shadow: none; transform: none; cursor: not-allowed; }
+
+        /* POST CARD */
+        .post-card {
+            background: white; border-radius: 16px;
+            box-shadow: var(--shadow); border: 1px solid var(--border);
+            margin-bottom: 1.25rem; overflow: hidden;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+        .post-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.5rem 0.75rem; }
+        .post-author { display: flex; align-items: center; gap: 0.75rem; }
+        .post-avatar { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #3b7de8, #00c896); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; flex-shrink: 0; }
+        .post-author-name { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+        .post-time { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+        .btn-delete {
+            background: none; border: none; color: #94a3b8; cursor: pointer;
+            padding: 0.4rem; border-radius: 8px; font-size: 1rem; transition: all 0.2s;
+            display: none;
+        }
+        .btn-delete:hover { background: #fee2e2; color: #ef4444; }
+        .btn-delete.visible { display: flex; align-items: center; }
+
+        .post-content { padding: 0 1.5rem 1rem; font-size: 0.95rem; line-height: 1.65; color: var(--text); white-space: pre-wrap; }
+
+        .post-actions {
+            display: flex; align-items: center; gap: 0.25rem;
+            padding: 0.75rem 1.5rem; border-top: 1px solid #f1f5f9;
+        }
+        .btn-action {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: none; border: none; color: var(--text-muted);
+            font-family: inherit; font-size: 0.85rem; font-weight: 600;
+            padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+            flex: 1; justify-content: center;
+        }
+        .btn-action:hover { background: #f1f5f9; color: var(--primary); }
+        .btn-action.liked { color: #ef4444; }
+        .btn-action.liked:hover { background: #fee2e2; }
+        .btn-action .icon { font-size: 1.1rem; }
+
+        /* COMMENTS */
+        .comments-section { padding: 0 1.5rem 1.25rem; }
+        .comment-item {
+            display: flex; gap: 0.6rem; margin-bottom: 0.75rem;
+            animation: slideIn 0.2s ease;
+        }
+        .comment-avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #ec4899); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.75rem; flex-shrink: 0; }
+        .comment-bubble { background: #f8faff; border-radius: 12px; padding: 0.6rem 0.9rem; flex: 1; border: 1px solid var(--border); }
+        .comment-author { font-weight: 700; font-size: 0.82rem; color: var(--primary); margin-bottom: 0.2rem; }
+        .comment-text { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+        .comment-time { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+        .comment-compose { display: flex; gap: 0.6rem; margin-top: 0.75rem; }
+        .comment-input {
+            flex: 1; border: 1.5px solid var(--border); border-radius: 20px;
+            padding: 0.55rem 1rem; font-family: inherit; font-size: 0.88rem;
+            color: var(--text); outline: none; transition: border-color 0.2s; background: #f8faff;
+        }
+        .comment-input:focus { border-color: var(--primary); background: white; }
+        .btn-send-comment {
+            width: 36px; height: 36px; border-radius: 50%; background: var(--primary);
+            color: white; border: none; cursor: pointer; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .btn-send-comment:hover { background: var(--primary-light); transform: scale(1.1); }
+
+        /* LOADING */
+        .loader { text-align: center; padding: 3rem; color: var(--text-muted); }
+        .empty-state { text-align: center; padding: 3rem 1rem; background: white; border-radius: 16px; border: 1px solid var(--border); }
+        .empty-state .emoji { font-size: 3rem; margin-bottom: 1rem; }
+        .empty-state h3 { font-family: 'Sora', sans-serif; margin-bottom: 0.5rem; }
+        .empty-state p { color: var(--text-muted); font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <a href="/" class="nav-logo">NTDV<span>·</span>home</a>
+    <nav class="nav-links">
+        <a href="/">🏠 Trang chủ</a>
+        <a href="/community" class="active">💬 Cộng đồng</a>
+        <a href="/chat">✉️ Tin nhắn</a>
+        <a href="/#services">🛠️ Dịch vụ</a>
+    </nav>
+    <div class="nav-user">
+        <div class="user-avatar" id="navAvatar">?</div>
+        <span id="navName" style="font-weight: 600; font-size: 0.9rem; color: var(--text);"></span>
+    </div>
+</header>
+
+<div class="page-layout">
+    <!-- HEADER BANNER -->
+    <div class="page-header">
+        <h1>💬 Cộng đồng NTDVhome</h1>
+        <p>Chia sẻ kinh nghiệm, hỏi đáp, và kết nối với cộng đồng nhà dịch vụ</p>
+    </div>
+
+    <!-- COMPOSE BOX -->
+    <div class="compose-box" id="composeBox" style="display:none;">
+        <div class="compose-header">
+            <div class="compose-avatar" id="composeAvatar">?</div>
+            <textarea class="compose-input" id="postContent" rows="2"
+                placeholder="Bạn đang nghĩ gì? Chia sẻ kinh nghiệm, hỏi đáp về dịch vụ..."
+                oninput="this.style.height='auto'; this.style.height=this.scrollHeight+'px'"></textarea>
+        </div>
+        <!-- Preview ảnh/video trước khi đăng -->
+        <div class="media-preview" id="mediaPreview">
+            <button class="btn-remove-media" onclick="removeMedia()">✕</button>
+            <img id="mediaPreviewImg" src="" alt="" style="display:none;">
+            <video id="mediaPreviewVideo" controls style="display:none;"></video>
+        </div>
+        <input type="file" id="mediaFileInput" accept="image/*,video/*" style="display:none;" onchange="previewMedia(this)">
+        <div class="compose-actions">
+            <div class="compose-media-btns">
+                <button class="btn-media" onclick="document.getElementById('mediaFileInput').click()">🖼️ Ảnh/Video</button>
+            </div>
+            <button class="btn-post" id="btnPost" onclick="submitPost()">📝 Đăng bài</button>
+        </div>
+    </div>
+
+    <!-- LOGIN PROMPT (nếu chưa đăng nhập) -->
+    <div id="loginPrompt" style="display:none; background:white; border-radius:16px; padding:1.5rem; text-align:center; margin-bottom:1.25rem; border:1px solid var(--border); box-shadow:var(--shadow);">
+        <p style="color:var(--text-muted); margin-bottom:1rem;">🔒 Đăng nhập để có thể đăng bài và bình luận</p>
+        <a href="/login" style="background:var(--primary); color:white; padding:0.6rem 1.5rem; border-radius:10px; text-decoration:none; font-weight:700;">Đăng nhập ngay</a>
+    </div>
+
+    <!-- FEED -->
+    <div id="feedContainer">
+        <div class="loader">⏳ Đang tải bài viết...</div>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (userInfoStr) {
+            currentUser = JSON.parse(userInfoStr);
+            // auth.js lưu dưới key 'name', profile.html dùng 'fullName' — hỗ trợ cả 2
+            const displayName = currentUser.name || currentUser.fullName || 'U';
+            const initials = displayName.charAt(0).toUpperCase();
+            document.getElementById('navAvatar').textContent = initials;
+            document.getElementById('navName').textContent = displayName;
+            document.getElementById('composeAvatar').textContent = initials;
+            document.getElementById('composeBox').style.display = 'block';
+        } else {
+            document.getElementById('loginPrompt').style.display = 'block';
+        }
+        loadFeed();
+    });
+
+    // ===================== LOAD FEED =====================
+    async function loadFeed() {
+        try {
+            const res = await fetch('/api/posts');
+            const posts = await res.json();
+            const container = document.getElementById('feedContainer');
+
+            if (!posts.length) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="emoji">🌱</div>
+                        <h3>Chưa có bài đăng nào</h3>
+                        <p>Hãy là người đầu tiên chia sẻ với cộng đồng!</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = posts.map(p => renderPost(p)).join('');
+        } catch (err) {
+            console.error(err);
+            document.getElementById('feedContainer').innerHTML = `<div class="loader">❌ Không thể tải bài viết.</div>`;
+        }
+    }
+
+    // ===================== RENDER POST =====================
+    function renderPost(post) {
+        const author = post.User || {};
+        const authorName = author.full_name || 'Người dùng';
+        const initials = authorName.charAt(0).toUpperCase();
+        const timeStr = formatTime(post.created_at);
+        const isOwner = currentUser && currentUser.id == (author.user_id || post.user_id);
+
+        const commentsHtml = (post.PostComments || []).map(c => renderComment(c)).join('');
+
+        return `
+        <div class="post-card" id="post-${post.post_id}">
+            <div class="post-header">
+                <div class="post-author">
+                    <a href="/user-profile/${author.user_id || post.user_id}" style="text-decoration:none;">
+                        <div class="post-avatar">${initials}</div>
+                    </a>
+                    <div>
+                        <a href="/user-profile/${author.user_id || post.user_id}" style="text-decoration:none; color:inherit;">
+                            <div class="post-author-name" style="cursor:pointer; transition:color 0.2s;" onmouseover="this.style.color='#0f52ba'" onmouseout="this.style.color=''">${authorName}</div>
+                        </a>
+                        <div class="post-time">🕐 ${timeStr}</div>
+                    </div>
+                </div>
+                <button class="btn-delete ${isOwner ? 'visible' : ''}" onclick="deletePost(${post.post_id})" title="Xóa bài">🗑️</button>
+            </div>
+            ${post.content ? `<div class="post-content">${escapeHtml(post.content)}</div>` : ''}
+            ${post.media_url ? (post.media_type === 'video'
+                ? `<video class="post-media" src="${post.media_url}" controls></video>`
+                : `<img class="post-media" src="${post.media_url}" alt="Ảnh bài đăng" loading="lazy" onclick="window.open('${post.media_url}','_blank')" style="cursor:zoom-in;">`
+            ) : ''}
+            <div class="post-actions">
+                <button class="btn-action" id="likeBtn-${post.post_id}" onclick="likePost(${post.post_id}, this)">
+                    <span class="icon">🤍</span> <span class="like-count">${post.likes_count || 0}</span> Thích
+                </button>
+                <button class="btn-action" onclick="focusComment(${post.post_id})">
+                    <span class="icon">💬</span> ${(post.PostComments || []).length} Bình luận
+                </button>
+            </div>
+            <div class="comments-section">
+                <div id="comments-${post.post_id}">${commentsHtml}</div>
+                ${currentUser ? `
+                <div class="comment-compose">
+                    <div class="comment-avatar">${(currentUser.name || currentUser.fullName || 'U').charAt(0).toUpperCase()}</div>
+                    <input class="comment-input" id="commentInput-${post.post_id}"
+                        placeholder="Viết bình luận..." 
+                        onkeydown="if(event.key==='Enter') submitComment(${post.post_id})">
+                    <button class="btn-send-comment" onclick="submitComment(${post.post_id})">➤</button>
+                </div>` : ''}
+            </div>
+        </div>`;
+    }
+
+    function renderComment(c) {
+        const author = c.User || {};
+        const name = author.full_name || 'Người dùng';
+        const uid = author.user_id || '';
+        return `
+        <div class="comment-item">
+            <a href="/user-profile/${uid}" style="text-decoration:none;">
+                <div class="comment-avatar" title="Xem hồ sơ">${name.charAt(0).toUpperCase()}</div>
+            </a>
+            <div class="comment-bubble">
+                <a href="/user-profile/${uid}" style="text-decoration:none;">
+                    <div class="comment-author" style="cursor:pointer;">${name}</div>
+                </a>
+                <div class="comment-text">${escapeHtml(c.content)}</div>
+                <div class="comment-time">${formatTime(c.created_at)}</div>
+            </div>
+        </div>`;
+    }
+
+    // ===================== PREVIEW ẢNH/VIDEO =====================
+    function previewMedia(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        const previewBox = document.getElementById('mediaPreview');
+        const imgEl = document.getElementById('mediaPreviewImg');
+        const videoEl = document.getElementById('mediaPreviewVideo');
+        const url = URL.createObjectURL(file);
+        const isVideo = file.type.startsWith('video/');
+        imgEl.style.display = isVideo ? 'none' : 'block';
+        videoEl.style.display = isVideo ? 'block' : 'none';
+        if (isVideo) videoEl.src = url;
+        else imgEl.src = url;
+        previewBox.style.display = 'block';
+    }
+
+    function removeMedia() {
+        document.getElementById('mediaFileInput').value = '';
+        document.getElementById('mediaPreview').style.display = 'none';
+        document.getElementById('mediaPreviewImg').src = '';
+        document.getElementById('mediaPreviewVideo').src = '';
+    }
+
+    // ===================== ĐĂNG BÀI (FormData - hỗ trợ file) =====================
+    async function submitPost() {
+        if (!currentUser) { alert('Vui lòng đăng nhập!'); return; }
+        const content = document.getElementById('postContent').value.trim();
+        const fileInput = document.getElementById('mediaFileInput');
+        const hasFile = fileInput.files && fileInput.files[0];
+        if (!content && !hasFile) { alert('Vui lòng nhập nội dung hoặc chọn ảnh/video!'); return; }
+
+        const btn = document.getElementById('btnPost');
+        btn.textContent = 'Đang đăng...'; btn.disabled = true;
+
+        const formData = new FormData();
+        formData.append('user_id', currentUser.id);
+        if (content) formData.append('content', content);
+        if (hasFile) formData.append('media', fileInput.files[0]);
+
+        try {
+            const res = await fetch('/api/posts', { method: 'POST', body: formData });
+            if (res.ok) {
+                const newPost = await res.json();
+                document.getElementById('postContent').value = '';
+                document.getElementById('postContent').style.height = 'auto';
+                removeMedia();
+                const container = document.getElementById('feedContainer');
+                if (container.querySelector('.empty-state') || container.querySelector('.loader')) container.innerHTML = '';
+                container.insertAdjacentHTML('afterbegin', renderPost(newPost));
+            } else {
+                const err = await res.json();
+                alert('Lỗi: ' + err.message);
+            }
+        } catch (e) { alert('Lỗi kết nối server!'); }
+        finally { btn.textContent = '📝 Đăng bài'; btn.disabled = false; }
+    }
+
+    // ===================== BÌNH LUẬN =====================
+    async function submitComment(postId) {
+        if (!currentUser) { alert('Vui lòng đăng nhập!'); return; }
+        const input = document.getElementById(`commentInput-${postId}`);
+        const content = input.value.trim();
+        if (!content) return;
+
+        try {
+            const res = await fetch(`/api/posts/${postId}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser.id, content })
+            });
+            if (res.ok) {
+                const newComment = await res.json();
+                document.getElementById(`comments-${postId}`).insertAdjacentHTML('beforeend', renderComment(newComment));
+                input.value = '';
+                // Cập nhật số bình luận
+                const btn = document.querySelector(`#post-${postId} .btn-action:nth-child(2)`);
+                if (btn) {
+                    const count = document.querySelectorAll(`#comments-${postId} .comment-item`).length;
+                    btn.innerHTML = `<span class="icon">💬</span> ${count} Bình luận`;
+                }
+            }
+        } catch (e) { alert('Lỗi kết nối server!'); }
+    }
+
+    // ===================== LIKE =====================
+    async function likePost(postId, btn) {
+        try {
+            const res = await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+            if (res.ok) {
+                const data = await res.json();
+                btn.classList.toggle('liked');
+                const icon = btn.querySelector('.icon');
+                icon.textContent = btn.classList.contains('liked') ? '❤️' : '🤍';
+                btn.querySelector('.like-count').textContent = data.likes_count;
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    // ===================== XÓA BÀI =====================
+    async function deletePost(postId) {
+        if (!confirm('Bạn có chắc muốn xóa bài đăng này không?')) return;
+        try {
+            const res = await fetch(`/api/posts/${postId}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentUser.id })
+            });
+            if (res.ok) {
+                const el = document.getElementById(`post-${postId}`);
+                el.style.opacity = '0'; el.style.transform = 'translateY(-10px)';
+                el.style.transition = 'all 0.3s ease';
+                setTimeout(() => el.remove(), 300);
+            } else {
+                const err = await res.json();
+                alert('Lỗi: ' + err.message);
+            }
+        } catch (e) { alert('Lỗi kết nối server!'); }
+    }
+
+    function focusComment(postId) {
+        const input = document.getElementById(`commentInput-${postId}`);
+        if (input) input.focus();
+    }
+
+    function formatTime(dateStr) {
+        if (!dateStr) return '';
+        const d = new Date(dateStr);
+        const now = new Date();
+        const diffMs = now - d;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffMins < 1) return 'Vừa xong';
+        if (diffMins < 60) return `${diffMins} phút trước`;
+        if (diffHours < 24) return `${diffHours} giờ trước`;
+        if (diffDays < 7) return `${diffDays} ngày trước`;
+        return d.toLocaleDateString('vi-VN');
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.appendChild(document.createTextNode(str || ''));
+        return div.innerHTML;
+    }
+</script>
+</body>
+</html>

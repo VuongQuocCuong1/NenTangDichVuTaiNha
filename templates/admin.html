@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - NTDVhome</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            display: flex;
+        }
+
+        /* Admin layout cần flex cho sidebar */
+
+        /* CSS cho thẻ thống kê */
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            flex: 1;
+        }
+
+        /* CSS cho Tab */
+        .section-tab {
+            display: none;
+        }
+
+        .section-tab.active {
+            display: block;
+        }
+
+        /* CSS cho Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            width: 100%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #6b7280;
+            border: none;
+            background: none;
+        }
+
+        .close-btn:hover {
+            color: #111827;
+        }
+
+        /* Badge vai trò */
+        .role-badge {
+            padding: 0.25rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .role-admin {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
+
+        .role-user {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        /* Biểu đồ container */
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            width: 100%;
+        }
+    </style>
+    <!-- Thư viện vẽ biểu đồ Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div class="admin-layout">
+        <!-- ================== MENU BÊN TRÁI ================== -->
+        <div class="sidebar">
+            <h2 style="text-align: center; margin-bottom: 2rem;">Admin Panel</h2>
+            <a onclick="switchTab('dashboard')" id="nav-dashboard" class="active">📊 Tổng quan</a>
+            <a onclick="switchTab('users')" id="nav-users">👥 Khách hàng</a>
+            <a onclick="switchTab('providers')" id="nav-providers">👷 Quản lý Thợ</a>
+            <a onclick="switchTab('services')" id="nav-services">🛠️ Dịch vụ</a>
+            <a onclick="switchTab('featured')" id="nav-featured">🌟 Quảng cáo & Đề xuất</a>
+            <a onclick="switchTab('withdrawals')" id="nav-withdrawals">💸 Quản lý Rút tiền</a>
+            <a onclick="switchTab('bookings')" id="nav-bookings">📅 Đơn Đặt Lịch</a>
+            <a onclick="switchTab('reviews')" id="nav-reviews">⭐ Đánh giá</a>
+            <a onclick="switchTab('penalties')" id="nav-penalties">⚖️ Xử phạt Thợ</a>
+            <a onclick="switchTab('settings')" id="nav-settings">⚙️ Cài đặt chung</a>
+            <a href="/" style="margin-top: 2rem; color: #ef4444;">🏠 Về trang khách</a>
+        </div>
+
+        <!-- ================== NỘI DUNG CHÍNH ================== -->
+        <div class="main-content">
+
+            <!-- 1. TAB TỔNG QUAN -->
+            <div id="tab-dashboard" class="section-tab active">
+                <div class="section-header">
+                    <h1>Tổng quan hệ thống</h1>
+                    <p>Chào mừng quản trị viên quay trở lại!</p>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                    
+                    <div class="stat-card" style="border-top: 4px solid #2563eb;">
+                        <h3 style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Tổng Khách Hàng</h3>
+                        <p id="totalUsers" style="font-size: 2.5rem; font-weight: bold; color: #1e293b;">...</p>
+                    </div>
+
+                    <div class="stat-card" style="border-top: 4px solid #059669;">
+                        <h3 style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Dịch Vụ Đang Mở</h3>
+                        <p id="totalServices" style="font-size: 2.5rem; font-weight: bold; color: #1e293b;">...</p>
+                    </div>
+
+                    <div class="stat-card" style="border-top: 4px solid #f59e0b;">
+                        <h3 style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Tổng Số Thợ (Đã duyệt)</h3>
+                        <p id="totalProviders" style="font-size: 2.5rem; font-weight: bold; color: #1e293b;">...</p>
+                    </div>
+
+                    <div class="stat-card" style="border-top: 4px solid #8b5cf6;">
+                        <h3 style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Doanh thu (Hoa hồng 20%)</h3>
+                        <p id="totalRevenue" style="font-size: 2rem; font-weight: bold; color: #1e293b;">...</p>
+                    </div>
+
+                    <div class="stat-card" style="border-top: 4px solid #10b981;">
+                        <h3 style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Phản hồi xuất sắc (5 Sao)</h3>
+                        <p id="fiveStarReviews" style="font-size: 2.5rem; font-weight: bold; color: #1e293b;">...</p>
+                    </div>
+
+                    <div class="stat-card" style="border-top: 4px solid #ef4444;">
+                        <h3 style="color: #6b7280; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Phản hồi kém (≤ 2 Sao)</h3>
+                        <p id="badReviews" style="font-size: 2.5rem; font-weight: bold; color: #1e293b;">...</p>
+                    </div>
+                </div>
+
+                <!-- KHU VỰC BIỂU ĐỒ -->
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 2rem;">
+                    <div class="chart-container" style="background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 4px 8px rgba(0,0,0,0.05); position: relative; height: 350px;">
+                        <h3 style="margin-bottom: 1rem; color: #1e293b; font-size: 1.1rem;">📈 Doanh thu 6 tháng qua (VNĐ)</h3>
+                        <div style="position: relative; height: 85%; width: 100%;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-container" style="background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 4px 8px rgba(0,0,0,0.05); position: relative; height: 350px;">
+                        <h3 style="margin-bottom: 1rem; color: #1e293b; font-size: 1.1rem;">👥 Tăng trưởng Người dùng</h3>
+                        <div style="position: relative; height: 85%; width: 100%;">
+                            <canvas id="userChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. TAB QUẢN LÝ NGƯỜI DÙNG -->
+            <div id="tab-users" class="section-tab">
+                <h1>Danh sách Người dùng</h1>
+                <p style="color: #6b7280; margin-bottom: 1rem;">Quản lý thông tin tài khoản khách hàng và phân quyền.
+                </p>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Họ và tên</th>
+                            <th>Số điện thoại</th>
+                            <th>Email</th>
+                            <th>Vai trò</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Đang tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 3. TAB QUẢN LÝ DỊCH VỤ -->
+            <div id="tab-services" class="section-tab">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>Danh sách Dịch vụ</h1>
+                        <p>Thêm, sửa, xóa các dịch vụ hiển thị trên trang chủ.</p>
+                    </div>
+                    <button class="btn-submit" style="background-color: #059669; width: auto;" onclick="openModal()">+
+                        Thêm Dịch Vụ Mới</button>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Icon</th>
+                            <th>Tên Dịch Vụ</th>
+                            <th>Giá Cơ Bản</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="serviceTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Đang tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB QUẢN LÝ ĐỀ XUẤT / QUẢNG CÁO (MỚI) -->
+            <div id="tab-featured" class="section-tab">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h1>Quảng cáo & Đề xuất Thợ</h1>
+                        <p>Quản lý danh sách thợ uy tín hiển thị trên trang chủ.</p>
+                    </div>
+                    <button class="btn-submit" style="background-color: #f59e0b; width: auto;" onclick="openFeaturedModal()">+ Thêm Đề Xuất Mới</button>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Thợ & Dịch vụ</th>
+                            <th>Huy hiệu</th>
+                            <th>Giá từ</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="featuredTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Đang tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- TAB QUẢN LÝ THỢ (PROVIDERS) -->
+            <div id="tab-providers" class="section-tab">
+                <div class="section-header">
+                    <h1>Quản lý Đối tác / Thợ</h1>
+                    <p>Duyệt hồ sơ và quản lý hoạt động của thợ.</p>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Họ tên & Trạng thái</th>
+                            <th>SĐT / CCCD</th>
+                            <th>Trạng thái tài khoản</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="providerTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Đang tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+            <!-- TAB QUẢN LÝ RÚT TIỀN (MỚI THÊM) -->
+            <div id="tab-withdrawals" class="section-tab">
+                <div class="section-header">
+                    <h1>Quản lý Rút tiền</h1>
+                    <p>Theo dõi và xử lý các yêu cầu rút tiền của thợ.</p>
+                </div>
+
+                <!-- BẢNG YÊU CẦU RÚT TIỀN (CHỜ DUYỆT) -->
+                <div
+                    style="background: white; border-radius: 0.75rem; padding: 1.75rem; margin-bottom: 1.5rem; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+                    <h3 style="margin-bottom: 1rem; color: #1e293b; font-size: 1.05rem;">💸 Yêu cầu Rút tiền (Chờ duyệt)
+                    </h3>
+                    <table class="data-table" style="box-shadow: none; margin-bottom: 0;">
+                        <thead>
+                            <tr>
+                                <th>Mã Giao dịch</th>
+                                <th>Tên Thợ</th>
+                                <th>SĐT</th>
+                                <th>Số tiền yêu cầu</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalsTableBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 1rem;">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- BẢNG LỊCH SỬ RÚT TIỀN -->
+                <div
+                    style="background: white; border-radius: 0.75rem; padding: 1.75rem; box-shadow: 0 4px 8px rgba(0,0,0,0.05);">
+                    <h3 style="margin-bottom: 1rem; color: #1e293b; font-size: 1.05rem;">🕒 Lịch sử duyệt rút</h3>
+                    <table class="data-table" style="box-shadow: none; margin-bottom: 0;">
+                        <thead>
+                            <tr>
+                                <th>Mã Giao dịch</th>
+                                <th>Tên Thợ</th>
+                                <th>SĐT</th>
+                                <th>Số tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody id="withdrawalHistoryTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 1rem;">Đang tải dữ liệu...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. TAB QUẢN LÝ ĐƠN ĐẶT LỊCH -->
+            <div id="tab-bookings" class="section-tab">
+                <div class="section-header">
+                    <h1>Quản lý Đơn Đặt Lịch</h1>
+                    <p>Theo dõi tiến độ các đơn hàng trên hệ thống.</p>
+                </div>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Mã Đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Dịch vụ & Thợ</th>
+                            <th>Thời gian & Địa chỉ</th>
+                            <th>Số tiền</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center;">Đang tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 6. TAB QUẢN LÝ ĐÁNH GIÁ -->
+            <div id="tab-reviews" class="section-tab">
+                <div class="section-header">
+                    <h1>Quản lý Đánh giá (Reviews)</h1>
+                    <p>Kiểm duyệt phản hồi của khách hàng.</p>
+                </div>
+
+                <!-- BỘ LỌC ĐÁNH GIÁ -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; background: white; padding: 1rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <select id="reviewStarFilter" style="padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 0.5rem; min-width: 150px; outline: none; cursor: pointer;" onchange="renderReviews()">
+                        <option value="all">Tất cả số sao</option>
+                        <option value="5">⭐⭐⭐⭐⭐ (5 Sao)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 Sao)</option>
+                        <option value="3">⭐⭐⭐ (3 Sao)</option>
+                        <option value="2">⭐⭐ (2 Sao)</option>
+                        <option value="1">⭐ (1 Sao)</option>
+                    </select>
+                    <input type="text" id="reviewSearchFilter" placeholder="Tìm theo tên khách, tên thợ, hoặc nội dung bình luận..." style="flex: 1; padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 0.5rem; outline: none;" oninput="renderReviews()">
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Khách hàng</th>
+                            <th>Thợ được đánh giá</th>
+                            <th>Đánh giá</th>
+                            <th>Bình luận</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Đang tải dữ liệu...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 7. TAB XỬ PHẠT (MỚI) -->
+            <div id="tab-penalties" class="section-tab">
+                <div class="section-header">
+                    <h1>⚖️ Xử phạt & Báo cáo</h1>
+                    <p>Quản lý các tài khoản Thợ vi phạm quy định của nền tảng.</p>
+                </div>
+                
+                <div style="background: #fffbeb; border: 1px solid #fcd34d; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    <h3 style="color: #b45309; margin-bottom: 0.5rem;">📜 Cơ chế xử phạt của NTDVhome:</h3>
+                    <ul style="color: #92400e; margin-left: 1.5rem; line-height: 1.6; font-size: 0.9rem;">
+                        <li><b>Mức 1 (Cảnh cáo):</b> Thợ có điểm đánh giá trung bình &lt; 3.0 hoặc bị khách báo cáo đến trễ. Hệ thống sẽ gửi email cảnh cáo.</li>
+                        <li><b>Mức 2 (Đình chỉ 7 ngày):</b> Tự ý hủy đơn sau khi nhận, hoặc có thái độ không tốt với khách hàng. Tài khoản bị vô hiệu hóa nhận đơn tạm thời.</li>
+                        <li><b>Mức 3 (Khóa vĩnh viễn):</b> Có hành vi lừa đảo, chiếm đoạt tài sản, vi phạm pháp luật nghiêm trọng.</li>
+                    </ul>
+                </div>
+
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID Thợ</th>
+                            <th>Họ và tên</th>
+                            <th>Lý do (Hệ thống tự quét)</th>
+                            <th>Trạng thái hiện tại</th>
+                            <th>Hành động xử lý</th>
+                        </tr>
+                    </thead>
+                    <tbody id="penaltyTableBody">
+                        <tr><td colspan="5" style="text-align: center;">Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 8. TAB CÀI ĐẶT HỆ THỐNG -->
+            <div id="tab-settings" class="section-tab">
+                <div class="section-header">
+                    <h1>Cài đặt hệ thống</h1>
+                    <p>Thay đổi thông tin website.</p>
+                </div>
+                <div
+                    style="background: white; padding: 2rem; border-radius: 0.5rem; max-width: 600px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <form id="settingsForm">
+                        <div class="input-group">
+                            <label>Số điện thoại Hotline</label>
+                            <input type="text" id="setHotline" value="1900 8888">
+                        </div>
+                        <div class="input-group">
+                            <label>Link Facebook Fanpage</label>
+                            <input type="text" id="setFb" value="https://facebook.com/ntdvhome">
+                        </div>
+                        <div class="input-group">
+                            <label>Thông báo Banner Trang chủ</label>
+                            <input type="text" id="setBanner" value="Giảm giá 20% cho khách hàng mới!">
+                        </div>
+                        <button type="submit" class="btn-submit" style="width: auto;">Lưu Cài Đặt</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ================== MODAL THÊM DỊCH VỤ ================== -->
+    <div id="addServiceModal" class="modal">
+        <div class="modal-content auth-card">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <h2 class="auth-title" style="margin-bottom: 1rem; text-align: left;">Thêm Dịch Vụ Mới</h2>
+
+            <form id="addServiceForm">
+                <input type="hidden" id="svcId" value="">
+                <div class="input-group">
+                    <label>Biểu tượng (Icon - VD: 🧹, ❄️, 🔧)</label>
+                    <input type="text" id="svcIcon" required placeholder="Nhập Emoji">
+                </div>
+                <div class="input-group">
+                    <label>Tên dịch vụ</label>
+                    <input type="text" id="svcName" required placeholder="VD: Vệ sinh máy lạnh">
+                </div>
+                <div class="input-group">
+                    <label>Giá cơ bản (VNĐ)</label>
+                    <input type="number" id="svcPrice" required placeholder="VD: 150000">
+                </div>
+                <div class="input-group">
+                    <label>Mô tả dịch vụ</label>
+                    <input type="text" id="svcDesc" required placeholder="Nhập mô tả ngắn gọn">
+                </div>
+                <button type="submit" class="btn-submit" id="btnAddService">Lưu Dịch Vụ</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL THÊM/SỬA ĐỀ XUẤT/QUẢNG CÁO (MỚI) -->
+    <div id="addFeaturedModal" class="modal">
+        <div class="modal-content auth-card" style="max-width: 600px;">
+            <button class="close-btn" onclick="closeFeaturedModal()">&times;</button>
+            <h2 id="featuredModalTitle" class="auth-title" style="margin-bottom: 1rem; text-align: left;">Thêm Đề Xuất Mới</h2>
+
+            <form id="addFeaturedForm">
+                <input type="hidden" id="fpId" value="">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="input-group">
+                        <label>Tên Thợ</label>
+                        <input type="text" id="fpName" required placeholder="VD: Nguyễn Thị Lan">
+                    </div>
+                    <div class="input-group">
+                        <label>Icon / Avatar</label>
+                        <input type="text" id="fpIcon" required placeholder="VD: 👩‍🦱">
+                    </div>
+                    <div class="input-group">
+                        <label>Mô tả ngắn</label>
+                        <input type="text" id="fpDesc" required placeholder="VD: Dọn dẹp nhà cửa · 5 năm KN">
+                    </div>
+                    <div class="input-group">
+                        <label>Huy hiệu (Tùy chọn)</label>
+                        <input type="text" id="fpBadge" placeholder="VD: 🔥 Nổi bật, ⭐ Quảng cáo">
+                    </div>
+                    <div class="input-group">
+                        <label>Giá từ (Text)</label>
+                        <input type="text" id="fpPriceText" required placeholder="VD: Từ 150.000 đ/buổi">
+                    </div>
+                    <div class="input-group">
+                        <label>Link trỏ tới</label>
+                        <input type="text" id="fpLink" required placeholder="VD: /service/cleaning">
+                    </div>
+                    <div class="input-group">
+                        <label>Tags (Cách nhau dấu phẩy)</label>
+                        <input type="text" id="fpTags" placeholder="VD: Dọn nhà, Giặt ủi">
+                    </div>
+                    <div style="display: flex; gap: 1rem;">
+                        <div class="input-group" style="flex:1;">
+                            <label>Đánh giá (Sao)</label>
+                            <input type="number" step="0.1" id="fpRating" value="5.0">
+                        </div>
+                        <div class="input-group" style="flex:1;">
+                            <label>Số lượt ĐG</label>
+                            <input type="number" id="fpReviewCount" value="100">
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <button type="submit" class="btn-submit" id="btnSaveFeatured">Lưu Đề Xuất</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================== MODAL XEM HỒ SƠ THỢ ================== -->
+    <div id="viewProviderModal" class="modal">
+        <div class="modal-content auth-card" style="max-width: 650px;">
+            <button class="close-btn" onclick="closeProviderModal()">&times;</button>
+            <h2 class="auth-title" style="margin-bottom: 1.5rem; text-align: left;">Chi tiết Hồ sơ Đối tác</h2>
+
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 250px;">
+                    <p style="margin-bottom: 0.5rem;"><strong>Họ và tên:</strong> <span id="provDetailName"></span></p>
+                    <p style="margin-bottom: 0.5rem;"><strong>SĐT:</strong> <span id="provDetailPhone"></span></p>
+                    <p style="margin-bottom: 0.5rem;"><strong>CCCD:</strong> <span id="provDetailCccd"></span></p>
+                    <p style="margin-top: 1rem; font-weight: bold;">Kinh nghiệm & Kỹ năng:</p>
+                    <p id="provDetailBio"
+                        style="background: #f3f4f6; padding: 1rem; border-radius: 0.5rem; font-size: 0.95rem; margin-top: 0.5rem; line-height: 1.5; color: #4b5563;">
+                    </p>
+                </div>
+                <div style="flex: 1; text-align: center; min-width: 250px;">
+                    <p style="font-weight: bold; margin-bottom: 0.5rem;">Ảnh minh chứng (CCCD/Bằng cấp):</p>
+                    <img id="provDetailImage" src="" alt="Ảnh minh chứng"
+                        style="max-width: 100%; max-height: 250px; border-radius: 0.5rem; border: 1px solid #d1d5db; display: none; object-fit: contain;">
+                    <p id="provDetailNoImage"
+                        style="color: #ef4444; font-style: italic; margin-top: 2rem; display: none;">Người dùng không
+                        cung cấp ảnh minh chứng.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================== JAVASCRIPT XỬ LÝ ================== -->
+    <script>
+        // --- 1. KIỂM TRA QUYỀN ADMIN ---
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (!userInfoStr) {
+            window.location.href = '/login';
+        } else {
+            const userInfo = JSON.parse(userInfoStr);
+            if (userInfo.role !== 'admin') {
+                alert("Bạn không có quyền truy cập trang này!");
+                window.location.href = '/';
+            }
+        }
+
+        // --- 2. CHUYỂN TAB VÀ LOAD DỮ LIỆU TƯƠNG ỨNG ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            document.getElementById('nav-' + tabId).classList.add('active');
+
+            if (tabId === 'users') loadUsers();
+            if (tabId === 'services') loadAdminServices();
+            if (tabId === 'featured') loadAdminFeaturedProviders();
+            if (tabId === 'providers') loadProviders();
+            if (tabId === 'bookings') loadBookings();
+            if (tabId === 'withdrawals') { loadWithdrawals(); loadWithdrawalHistory(); }
+            if (tabId === 'reviews') loadReviews();
+            if (tabId === 'penalties') loadPenalties();
+            if (tabId === 'dashboard') { loadUsers(); loadAdminServices(); loadDashboardData(); }
+        }
+
+        async function loadDashboardData() {
+            try {
+                const res = await fetch('/api/admin/dashboard-stats');
+                const data = await res.json();
+                
+                document.getElementById('totalProviders').innerText = data.total_providers;
+                document.getElementById('totalRevenue').innerText = data.total_revenue.toLocaleString('vi-VN') + ' đ';
+                document.getElementById('fiveStarReviews').innerText = data.five_star_reviews;
+                document.getElementById('badReviews').innerText = data.bad_reviews;
+
+                // Vẽ biểu đồ
+                drawCharts(data.total_revenue, data.total_providers);
+            } catch (e) { console.error("Lỗi tải dashboard stats", e); }
+        }
+
+        let chart1, chart2;
+        function drawCharts(revenue, providers) {
+            // Hủy chart cũ nếu có để không bị đè lên nhau
+            if(chart1) chart1.destroy();
+            if(chart2) chart2.destroy();
+
+            const ctx1 = document.getElementById('revenueChart').getContext('2d');
+            chart1 = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Tháng 12', 'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng này'],
+                    datasets: [{
+                        label: 'Doanh thu (VNĐ)',
+                        // Dữ liệu mô phỏng, tháng cuối cùng lấy doanh thu thực tế
+                        data: [1200000, 1900000, 1500000, 2200000, 2800000, revenue || 5000000],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+
+            const ctx2 = document.getElementById('userChart').getContext('2d');
+            chart2 = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Khách hàng', 'Thợ Đối tác'],
+                    datasets: [{
+                        data: [parseInt(document.getElementById('totalUsers').innerText) || 5, providers || 2],
+                        backgroundColor: ['#10b981', '#f59e0b']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // --- KHU VỰC XỬ PHẠT THỢ ---
+        async function loadPenalties() {
+            try {
+                const res = await fetch('/api/admin/providers');
+                const providers = await res.json();
+                const tbody = document.getElementById('penaltyTableBody');
+                
+                let html = '';
+                providers.forEach(p => {
+                    // Logic mô phỏng: Tìm những thợ có trạng thái suspended hoặc ta giả vờ quét xem ai vi phạm
+                    let isSuspended = p.status === 'suspended';
+                    let reason = isSuspended ? '<span style="color:#ef4444">Hủy nhiều đơn / Vi phạm nội quy</span>' : '<span style="color:#6b7280">Bình thường</span>';
+                    
+                    let actionHtml = '';
+                    if (isSuspended) {
+                        actionHtml = `<button style="background: #10b981; color: white; border:none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;" onclick="punishWorker(${p.id}, 'active')">🔓 Mở khóa</button>`;
+                    } else {
+                        actionHtml = `
+                            <button style="background: #f59e0b; color: white; border:none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer; margin-right: 0.5rem;" onclick="alert('Đã gửi email cảnh cáo đến thợ!')">✉️ Cảnh cáo</button>
+                            <button style="background: #ef4444; color: white; border:none; padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;" onclick="punishWorker(${p.id}, 'suspended')">🔒 Đình chỉ</button>
+                        `;
+                    }
+
+                    html += `
+                        <tr>
+                            <td>#${p.id}</td>
+                            <td style="font-weight:bold;">${p.name}</td>
+                            <td>${reason}</td>
+                            <td><span class="role-badge" style="background:${isSuspended ? '#fee2e2':'#dcfce3'}; color:${isSuspended ? '#dc2626':'#16a34a'}">${isSuspended ? 'Bị đình chỉ' : 'Hoạt động'}</span></td>
+                            <td>${actionHtml}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch(e) { console.error(e); }
+        }
+
+        async function punishWorker(id, newStatus) {
+            let msg = newStatus === 'suspended' ? 'Bạn chắc chắn muốn đình chỉ thợ này?' : 'Bạn muốn mở khóa cho thợ này?';
+            if(!confirm(msg)) return;
+            try {
+                const res = await fetch(`/api/admin/providers/${id}/status`, {
+                    method: 'PUT', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) { alert('Cập nhật xử phạt thành công!'); loadPenalties(); loadProviders(); }
+            } catch(e) { alert('Lỗi kết nối!'); }
+        }
+
+        // --- 3. KHU VỰC KHÁCH HÀNG (GIỮ NGUYÊN) ---
+        async function loadUsers() {
+            try {
+                const response = await fetch('/api/admin/users');
+                const users = await response.json();
+                document.getElementById('totalUsers').innerText = users.length;
+
+                const tbody = document.getElementById('userTableBody');
+                if (tbody) tbody.innerHTML = users.map(u => {
+                    const isAdmin = u.role === 'admin';
+                    const newRole = isAdmin ? 'user' : 'admin';
+                    const btnText = isAdmin ? 'Hạ quyền' : 'Cấp Admin';
+                    const btnColor = isAdmin ? '#f59e0b' : '#10b981';
+                    return `
+                    <tr>
+                        <td>#${u.user_id}</td>
+                        <td style="font-weight: bold;">${u.full_name}</td>
+                        <td>${u.phone_number}</td>
+                        <td>${u.email}</td>
+                        <td>${isAdmin ? '<span class="role-badge role-admin">Admin</span>' : '<span class="role-badge role-user">Khách hàng</span>'}</td>
+                        <td>
+                            <button style="padding: 0.4rem 0.8rem; background: ${btnColor}; color: white; border: none; border-radius: 0.25rem; cursor: pointer; margin-right: 0.5rem;" onclick="changeRole(${u.user_id}, '${newRole}')">${btnText}</button>
+                            <button style="padding: 0.4rem 0.8rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer;" onclick="deleteUser(${u.user_id})">Xóa</button>
+                        </td>
+                    </tr>
+                    `;
+                }).join('');
+            } catch (error) { console.error("Lỗi:", error); }
+        }
+
+        async function changeRole(id, newRole) {
+            const roleName = newRole === 'admin' ? 'ADMIN' : 'KHÁCH HÀNG';
+            if (confirm(`Bạn có chắc chắn muốn đổi quyền tài khoản này thành ${roleName}?`)) {
+                try {
+                    const response = await fetch(`/api/admin/users/${id}/role`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role: newRole }) });
+                    if (response.ok) { alert('Cập nhật quyền thành công!'); loadUsers(); }
+                    else { alert('Lỗi cập nhật quyền!'); }
+                } catch (error) { alert('Không kết nối được tới Server!'); }
+            }
+        }
+
+        async function deleteUser(id) {
+            if (confirm('CẢNH BÁO: Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản này? Hành động này không thể hoàn tác.')) {
+                try {
+                    const response = await fetch(`/api/admin/users/${id}`, { method: 'DELETE' });
+                    if (response.ok) { alert('Đã xóa tài khoản thành công!'); loadUsers(); }
+                    else { alert('Lỗi khi xóa tài khoản!'); }
+                } catch (error) { alert('Không kết nối được tới Server!'); }
+            }
+        }
+
+        // --- 4. KHU VỰC DỊCH VỤ (GIỮ NGUYÊN) ---
+        let allServices = [];
+        async function loadAdminServices() {
+            try {
+                const response = await fetch('/api/services');
+                allServices = await response.json();
+                document.getElementById('totalServices').innerText = allServices.length;
+
+                const tbody = document.getElementById('serviceTableBody');
+                if (tbody) tbody.innerHTML = allServices.map(svc => `
+                    <tr>
+                        <td>#${svc.service_id}</td>
+                        <td style="font-size: 1.5rem;">${svc.icon || '🛠️'}</td>
+                        <td style="font-weight: bold; color: #2563eb;">${svc.name}</td>
+                        <td>${Number(svc.price_range).toLocaleString('vi-VN')} đ</td>
+                        <td>
+                            <button class="btn-action" style="background: #f59e0b;" onclick="openEditModal(${svc.service_id})">Sửa</button>
+                            <button class="btn-action" style="background: #ef4444;" onclick="deleteService(${svc.service_id})">Xóa</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) { console.error("Lỗi:", error); }
+        }
+
+        async function deleteService(id) {
+            if (confirm('Bạn có chắc chắn muốn xóa dịch vụ này không?')) {
+                try {
+                    const response = await fetch('/api/admin/services/' + id, { method: 'DELETE' });
+                    if (response.ok) { alert('Đã xóa thành công!'); loadAdminServices(); }
+                } catch (error) { alert('Không thể kết nối Server!'); }
+            }
+        }
+
+        const modalTitle = document.querySelector('.modal-content h2');
+        const submitBtn = document.getElementById('btnAddService');
+
+        function openModal() {
+            document.getElementById('addServiceForm').reset();
+            document.getElementById('svcId').value = "";
+            modalTitle.innerText = "Thêm Dịch Vụ Mới";
+            submitBtn.innerText = "Lưu Dịch Vụ";
+            document.getElementById('addServiceModal').classList.add('show');
+        }
+
+        function openEditModal(id) {
+            const svc = allServices.find(s => s.service_id === id);
+            if (svc) {
+                document.getElementById('svcId').value = svc.service_id;
+                document.getElementById('svcIcon').value = svc.icon === 'null' ? '🛠️' : svc.icon;
+                document.getElementById('svcName').value = svc.name;
+                document.getElementById('svcPrice').value = svc.price_range;
+                document.getElementById('svcDesc').value = svc.description;
+                modalTitle.innerText = "Chỉnh sửa Dịch Vụ";
+                submitBtn.innerText = "Cập nhật";
+                document.getElementById('addServiceModal').classList.add('show');
+            }
+        }
+
+        function closeModal() { document.getElementById('addServiceModal').classList.remove('show'); }
+
+        document.getElementById('addServiceForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            submitBtn.innerText = 'Đang lưu...'; submitBtn.disabled = true;
+
+            const svcId = document.getElementById('svcId').value;
+            const isEdit = svcId !== "";
+            const serviceData = {
+                icon: document.getElementById('svcIcon').value,
+                name: document.getElementById('svcName').value,
+                price: document.getElementById('svcPrice').value,
+                description: document.getElementById('svcDesc').value
+            };
+
+            const apiUrl = isEdit ? '/api/admin/services/' + svcId : '/api/admin/services';
+            const apiMethod = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(apiUrl, { method: apiMethod, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(serviceData) });
+                submitBtn.disabled = false;
+                if (response.ok) { alert(isEdit ? 'Cập nhật thành công!' : 'Thêm mới thành công!'); closeModal(); loadAdminServices(); }
+                else { alert('Lỗi xử lý!'); submitBtn.innerText = isEdit ? 'Cập nhật' : 'Lưu Dịch Vụ'; }
+            } catch (error) { submitBtn.disabled = false; alert('Không thể kết nối Server!'); }
+        });
+
+        // --- CÁC HÀM XỬ LÝ QUẢNG CÁO & ĐỀ XUẤT (MỚI) ---
+        let allFeatured = [];
+        async function loadAdminFeaturedProviders() {
+            try {
+                const response = await fetch('/api/featured-providers');
+                allFeatured = await response.json();
+                
+                const tbody = document.getElementById('featuredTableBody');
+                if (tbody) tbody.innerHTML = allFeatured.map(fp => `
+                    <tr>
+                        <td>#${fp.id}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div style="font-size: 1.5rem;">${fp.avatar_icon || '👷'}</div>
+                                <div>
+                                    <div style="font-weight: bold; color: var(--primary);">${fp.provider_name}</div>
+                                    <div style="font-size: 0.8rem; color: #6b7280;">${fp.description}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span style="background: #fef08a; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.8rem;">${fp.badge || 'Không có'}</span></td>
+                        <td><b>${fp.price_text}</b></td>
+                        <td>
+                            <button class="btn-action" style="background:#f59e0b;" onclick="openFeaturedModal(${fp.id})">Sửa</button>
+                            <button class="btn-action" style="background:#ef4444;" onclick="deleteFeaturedProvider(${fp.id})">Xóa</button>
+                        </td>
+                    </tr>`).join('');
+            } catch(e) { console.error("Lỗi lấy danh sách đề xuất:", e); }
+        }
+
+        async function deleteFeaturedProvider(id) {
+            if (confirm('Bạn có chắc muốn xóa mục này khỏi trang chủ?')) {
+                try {
+                    const response = await fetch('/api/admin/featured-providers/' + id, { method: 'DELETE' });
+                    if (response.ok) { alert('Đã xóa thành công!'); loadAdminFeaturedProviders(); }
+                } catch (error) { alert('Lỗi kết nối!'); }
+            }
+        }
+
+        function openFeaturedModal(id = null) {
+            document.getElementById('addFeaturedForm').reset();
+            const title = document.getElementById('featuredModalTitle');
+            const btnSave = document.getElementById('btnSaveFeatured');
+            
+            if (id) {
+                const fp = allFeatured.find(x => x.id === id);
+                if (fp) {
+                    document.getElementById('fpId').value = fp.id;
+                    document.getElementById('fpName').value = fp.provider_name;
+                    document.getElementById('fpIcon').value = fp.avatar_icon;
+                    document.getElementById('fpDesc').value = fp.description;
+                    document.getElementById('fpBadge').value = fp.badge || '';
+                    document.getElementById('fpPriceText').value = fp.price_text;
+                    document.getElementById('fpLink').value = fp.service_link;
+                    document.getElementById('fpTags').value = fp.tags || '';
+                    document.getElementById('fpRating').value = fp.rating;
+                    document.getElementById('fpReviewCount').value = fp.review_count;
+                    title.innerText = "Sửa Đề Xuất / Quảng Cáo";
+                    btnSave.innerText = "Cập nhật";
+                }
+            } else {
+                document.getElementById('fpId').value = "";
+                title.innerText = "Thêm Đề Xuất Mới";
+                btnSave.innerText = "Lưu Đề Xuất";
+            }
+            document.getElementById('addFeaturedModal').classList.add('show');
+        }
+
+        function closeFeaturedModal() { document.getElementById('addFeaturedModal').classList.remove('show'); }
+
+        document.getElementById('addFeaturedForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btnSave = document.getElementById('btnSaveFeatured');
+            btnSave.innerText = 'Đang lưu...'; btnSave.disabled = true;
+
+            const fpId = document.getElementById('fpId').value;
+            const isEdit = fpId !== "";
+            const data = {
+                provider_name: document.getElementById('fpName').value,
+                avatar_icon: document.getElementById('fpIcon').value,
+                description: document.getElementById('fpDesc').value,
+                badge: document.getElementById('fpBadge').value,
+                price_text: document.getElementById('fpPriceText').value,
+                service_link: document.getElementById('fpLink').value,
+                tags: document.getElementById('fpTags').value,
+                rating: document.getElementById('fpRating').value,
+                review_count: document.getElementById('fpReviewCount').value
+            };
+
+            const apiUrl = isEdit ? '/api/admin/featured-providers/' + fpId : '/api/admin/featured-providers';
+            const apiMethod = isEdit ? 'PUT' : 'POST';
+
+            try {
+                const response = await fetch(apiUrl, { method: apiMethod, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                btnSave.disabled = false;
+                if (response.ok) { alert(isEdit ? 'Cập nhật thành công!' : 'Thêm mới thành công!'); closeFeaturedModal(); loadAdminFeaturedProviders(); }
+                else { alert('Lỗi xử lý!'); btnSave.innerText = isEdit ? 'Cập nhật' : 'Lưu Đề Xuất'; }
+            } catch (error) { btnSave.disabled = false; alert('Không thể kết nối Server!'); }
+        });
+
+        // --- 5. KHU VỰC THỢ (PROVIDERS) ---
+        let allProviders = []; // Biến toàn cục để lưu danh sách thợ
+
+        async function loadProviders() {
+            try {
+                const res = await fetch('/api/admin/providers');
+                allProviders = await res.json(); // Lưu lại để dùng cho Modal
+
+                document.getElementById('providerTableBody').innerHTML = allProviders.map(p => {
+                    const statusColor = p.status === 'active' ? '#10b981' : (p.status === 'banned' ? '#ef4444' : '#6b7280');
+
+                    const viewBtn = `<button class="btn-action" style="background:#4b5563;" onclick="viewProvider(${p.id})">Xem Hồ Sơ</button>`;
+                    const verifyBtn = !p.verified ? `<button class="btn-action" style="background:#3b82f6;" onclick="updateProvider(${p.id}, {verified: true, status: 'active'})">Duyệt</button>` : '';
+                    const banBtn = p.status !== 'banned' ? `<button class="btn-action" style="background:#ef4444;" onclick="updateProvider(${p.id}, {status: 'banned'})">Khóa</button>` : `<button class="btn-action" style="background:#10b981;" onclick="updateProvider(${p.id}, {status: 'active'})">Mở Khóa</button>`;
+
+                    return `
+                    <tr>
+                        <td>#${p.id}</td>
+                        <td><b>${p.name}</b> ${p.verified ? '✅' : '⏳'}</td>
+                        <td>SĐT: ${p.phone}<br>CCCD: ${p.cccd}</td>
+                        <td><span class="badge" style="background: ${statusColor}">${p.status.toUpperCase()}</span></td>
+                        <td>${viewBtn} ${verifyBtn} ${banBtn}</td>
+                    </tr>`;
+                }).join('');
+            } catch (error) { console.log(error); }
+        }
+
+        async function updateProvider(id, data) {
+            if (confirm('Bạn có chắc muốn thực hiện thao tác này?')) {
+                await fetch(`/api/admin/providers/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                loadProviders();
+            }
+        }
+
+        // Hàm mở Modal Xem chi tiết Thợ
+        function viewProvider(id) {
+            const p = allProviders.find(x => x.id === id);
+            if (!p) return;
+
+            document.getElementById('provDetailName').innerText = p.name;
+            document.getElementById('provDetailPhone').innerText = p.phone;
+            document.getElementById('provDetailCccd').innerText = p.cccd;
+            document.getElementById('provDetailBio').innerText = p.bio || 'Chưa cung cấp thông tin kinh nghiệm.';
+
+            const imgEl = document.getElementById('provDetailImage');
+            const noImgEl = document.getElementById('provDetailNoImage');
+
+            if (p.avatar) {
+                imgEl.src = p.avatar; // Gắn link ảnh vào thẻ img
+                imgEl.style.display = 'block';
+                noImgEl.style.display = 'none';
+            } else {
+                imgEl.style.display = 'none';
+                noImgEl.style.display = 'block';
+            }
+
+            document.getElementById('viewProviderModal').classList.add('show');
+        }
+
+        function closeProviderModal() {
+            document.getElementById('viewProviderModal').classList.remove('show');
+        }
+        async function updateProvider(id, data) {
+            if (confirm('Bạn có chắc muốn thực hiện thao tác này?')) {
+                await fetch(`/api/admin/providers/${id}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+                loadProviders();
+            }
+        }
+
+        // --- 6. KHU VỰC ĐƠN HÀNG (BOOKINGS) MỚI ---
+        async function loadBookings() {
+            const tbody = document.getElementById('bookingTableBody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:#64748b;">Đang tải dữ liệu...</td></tr>';
+            try {
+                const res = await fetch('/api/admin/bookings');
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:#ef4444;">❌ Lỗi: ${err.detail || err.message || res.statusText}</td></tr>`;
+                    return;
+                }
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:#64748b;">Chưa có đơn đặt lịch nào.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map(b => {
+                    let statusColor = '#6b7280';
+                    if (b.status === 'pending')  statusColor = '#f59e0b';
+                    if (b.status === 'in_progress' || b.status === 'accepted') statusColor = '#3b82f6';
+                    if (b.status === 'completed') statusColor = '#10b981';
+                    if (b.status === 'cancelled') statusColor = '#ef4444';
+
+                    const statusLabel = {
+                        pending: 'Chờ xử lý',
+                        accepted: 'Đã nhận',
+                        in_progress: 'Đang làm',
+                        completed: 'Hoàn thành',
+                        cancelled: 'Đã hủy'
+                    }[b.status] || b.status.toUpperCase();
+
+                    return `
+                    <tr>
+                        <td><b>#${b.id}</b></td>
+                        <td>${b.customer}</td>
+                        <td><b>${b.service}</b><br><small style="color:#6b7280;">Thợ: ${b.provider}</small></td>
+                        <td>${b.time}<br><small style="color:#6b7280;">${b.address}</small></td>
+                        <td style="font-weight:bold; color:#059669;">${b.amount}</td>
+                        <td><span class="badge" style="background:${statusColor}">${statusLabel}</span></td>
+                    </tr>`;
+                }).join('');
+            } catch (e) {
+                console.error('loadBookings error:', e);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:1.5rem; color:#ef4444;">❌ Không thể kết nối đến server.</td></tr>`;
+            }
+        }
+        // Hàm tải danh sách rút tiền
+        async function loadWithdrawals() {
+            const res = await fetch('/api/admin/withdrawals');
+            const data = await res.json();
+            const tbody = document.getElementById('withdrawalsTableBody');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 1rem; color: #64748b;">Không có yêu cầu rút tiền nào.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(tx => `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 1rem;">#${tx.tx_id}</td>
+                <td style="padding: 1rem; font-weight: bold;">${tx.provider_name}</td>
+                <td style="padding: 1rem;">${tx.phone}</td>
+                <td style="padding: 1rem; color: #ef4444; font-weight: bold;">${tx.amount.toLocaleString('vi-VN')} đ</td>
+                <td style="padding: 1rem;">
+                    <button onclick="handleWithdrawal(${tx.tx_id}, 'approve')" style="padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; margin-right: 0.5rem;">✅ Duyệt</button>
+                    <button onclick="handleWithdrawal(${tx.tx_id}, 'reject')" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 6px; cursor: pointer;">❌ Từ chối</button>
+                </td>
+            </tr>
+        `).join('');
+        }
+
+        // Hàm gọi API duyệt/từ chối
+        async function handleWithdrawal(txId, action) {
+            if (!confirm(action === 'approve' ? "Xác nhận bạn ĐÃ CHUYỂN KHOẢN tiền thật cho thợ?" : "Bạn muốn từ chối và hoàn tiền lại cho thợ?")) return;
+
+            const res = await fetch(`/api/admin/withdrawals/${txId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action })
+            });
+
+            const result = await res.json();
+            alert(result.message);
+            loadWithdrawals(); // Load lại bảng chờ
+            loadWithdrawalHistory(); // Load lại bảng lịch sử
+        }
+
+        // Hàm tải danh sách lịch sử rút tiền
+        async function loadWithdrawalHistory() {
+            const res = await fetch('/api/admin/withdrawals/history');
+            const data = await res.json();
+            const tbody = document.getElementById('withdrawalHistoryTableBody');
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 1rem; color: #64748b;">Chưa có lịch sử giao dịch.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(tx => {
+                const statusColor = tx.status === 'Đã duyệt' ? '#10b981' : '#ef4444';
+                return `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 1rem;">#${tx.tx_id}</td>
+                <td style="padding: 1rem; font-weight: bold;">${tx.provider_name}</td>
+                <td style="padding: 1rem;">${tx.phone}</td>
+                <td style="padding: 1rem; font-weight: bold;">${tx.amount.toLocaleString('vi-VN')} đ</td>
+                <td style="padding: 1rem;"><span class="badge" style="background: ${statusColor}">${tx.status}</span></td>
+                <td style="padding: 1rem; color: #64748b; font-size: 0.9rem;">${tx.date}</td>
+            </tr>
+            `;
+            }).join('');
+        }
+
+        // Gọi hàm này khi trang Admin vừa tải xong
+        document.addEventListener("DOMContentLoaded", () => {
+            loadWithdrawals();
+            loadWithdrawalHistory();
+        });
+
+        // --- 7. KHU VỰC ĐÁNH GIÁ (REVIEWS) MỚI ---
+        let allReviews = [];
+
+        async function loadReviews() {
+            try {
+                const res = await fetch('/api/admin/reviews');
+                allReviews = await res.json();
+                renderReviews();
+            } catch (e) { console.log(e); }
+        }
+
+        function renderReviews() {
+            const tbody = document.getElementById('reviewTableBody');
+            const starFilter = document.getElementById('reviewStarFilter').value;
+            const searchFilter = document.getElementById('reviewSearchFilter').value.toLowerCase();
+            
+            let filtered = allReviews;
+            
+            // Lọc theo số sao
+            if (starFilter !== 'all') {
+                filtered = filtered.filter(r => r.stars === parseInt(starFilter));
+            }
+            
+            // Lọc theo từ khóa tìm kiếm
+            if (searchFilter) {
+                filtered = filtered.filter(r => 
+                    (r.customer && r.customer.toLowerCase().includes(searchFilter)) ||
+                    (r.provider && r.provider.toLowerCase().includes(searchFilter)) ||
+                    (r.comment && r.comment.toLowerCase().includes(searchFilter))
+                );
+            }
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 1.5rem; color: #64748b;">Không tìm thấy đánh giá nào phù hợp với bộ lọc hiện tại.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(r => `
+                <tr>
+                    <td><b>${r.customer}</b></td>
+                    <td style="color: #2563eb; font-weight: 500;">${r.provider}</td>
+                    <td style="color:#f59e0b; font-size:1.2rem;">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</td>
+                    <td>${r.comment}</td>
+                    <td><button class="btn-action" style="background:#ef4444;" onclick="deleteReview(${r.id})">Xóa/Ẩn</button></td>
+                </tr>`).join('');
+        }
+
+
+        async function deleteReview(id) {
+            if (confirm('Bạn có chắc muốn xóa bình luận này?')) {
+                await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
+                loadReviews();
+            }
+        }
+
+        // --- 8. CÀI ĐẶT HỆ THỐNG MỚI ---
+        document.getElementById('settingsForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            localStorage.setItem('site_hotline', document.getElementById('setHotline').value);
+            localStorage.setItem('site_fb', document.getElementById('setFb').value);
+            localStorage.setItem('site_banner', document.getElementById('setBanner').value);
+            alert('Đã lưu cấu hình hệ thống thành công!');
+        });
+
+        // Chạy lần đầu
+        loadUsers();
+        loadAdminServices();
+        loadDashboardData();
+    </script>
+</body>
+
+</html>

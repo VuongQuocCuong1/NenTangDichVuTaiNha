@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn dịch vụ của tôi - NTDVhome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f52ba; --primary-dark: #0a3d8f;
+            --accent: #ff6b35; --accent-2: #00c896;
+            --bg: #f0f4ff; --text: #0d1b2a; --text-muted: #5a6a7a;
+            --border: #e2e8f0; --shadow: 0 4px 24px rgba(15,82,186,0.10);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+        /* NAVBAR */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; height: 68px;
+            background: rgba(255,255,255,0.97); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border); box-shadow: 0 2px 12px rgba(15,82,186,0.07);
+        }
+        .nav-logo { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .nav-logo span { color: #ff6b35; }
+        .nav-right { display: flex; align-items: center; gap: 1rem; }
+        .nav-link { color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem; padding: 0.4rem 0.85rem; border-radius: 8px; transition: all 0.2s; }
+        .nav-link:hover { background: #eff6ff; color: var(--primary); }
+        .nav-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; cursor: pointer; }
+
+        /* HERO */
+        .hero {
+            background: linear-gradient(135deg, #0f52ba 0%, #1a6fd4 100%);
+            padding: 2.5rem 5%; display: flex; align-items: center; gap: 2rem;
+        }
+        .hero-icon { font-size: 3rem; }
+        .hero h1 { font-family: 'Sora', sans-serif; font-size: 1.8rem; font-weight: 700; color: white; }
+        .hero p { color: #bfdbfe; font-size: 0.9rem; margin-top: 0.3rem; }
+
+        /* MAIN */
+        .main { max-width: 900px; margin: 2rem auto; padding: 0 5%; }
+
+        /* TABS */
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tab { padding: 0.5rem 1.25rem; border-radius: 99px; border: 1.5px solid var(--border); background: white; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* ORDER CARD */
+        .order-card {
+            background: white; border-radius: 16px; border: 1px solid var(--border);
+            margin-bottom: 1.25rem; overflow: hidden; transition: box-shadow 0.2s;
+        }
+        .order-card:hover { box-shadow: var(--shadow); }
+        .order-header {
+            padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid #f1f5f9; background: #fafbff;
+        }
+        .order-id { font-family: 'Sora', sans-serif; font-weight: 700; color: var(--primary); font-size: 0.95rem; }
+        .order-date { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem; }
+        .badge { padding: 0.3rem 0.85rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+        .badge-pending { background: #fef3c7; color: #d97706; }
+        .badge-inprog  { background: #dbeafe; color: #1d4ed8; }
+        .badge-done    { background: #d1fae5; color: #059669; }
+        .badge-cancel  { background: #fee2e2; color: #dc2626; }
+
+        .order-body { padding: 1.25rem 1.5rem; display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .order-info { flex: 1; min-width: 200px; }
+        .info-row { display: flex; gap: 0.5rem; margin-bottom: 0.55rem; font-size: 0.875rem; }
+        .info-key { color: var(--text-muted); min-width: 80px; font-weight: 500; }
+        .info-val { font-weight: 600; }
+
+        .order-actions { display: flex; flex-direction: column; gap: 0.5rem; min-width: 150px; }
+        .btn { padding: 0.6rem 1rem; border-radius: 10px; border: none; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .btn-chat   { background: #eff6ff; color: var(--primary); border: 1px solid #bfdbfe; }
+        .btn-chat:hover { background: var(--primary); color: white; }
+        .btn-review { background: #fff7ed; color: var(--accent); border: 1px solid #fed7aa; }
+        .btn-review:hover { background: var(--accent); color: white; }
+        .btn-cancel { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+        .btn-cancel:hover { background: #dc2626; color: white; }
+        .btn-rebook { background: var(--primary); color: white; }
+        .btn-rebook:hover { background: var(--primary-dark); }
+
+        /* EMPTY STATE */
+        .empty { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+        .empty-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .empty h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+
+        /* CHAT MODAL */
+        #chatModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 9999;
+            align-items: center; justify-content: center; backdrop-filter: blur(4px);
+        }
+        #chatModal.open { display: flex; }
+        .chat-box {
+            background: white; width: 90%; max-width: 420px; border-radius: 18px;
+            overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+            display: flex; flex-direction: column; max-height: 85vh;
+        }
+        .chat-head {
+            background: linear-gradient(135deg, #0f52ba, #1a6fd4);
+            color: white; padding: 1rem 1.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chat-head-name { font-weight: 700; font-size: 1rem; }
+        .chat-head-sub  { font-size: 0.78rem; opacity: 0.8; margin-top: 0.1rem; }
+        .chat-close { background: none; border: none; color: white; font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0.2rem; }
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 1rem;
+            background: #f8fafc; display: flex; flex-direction: column; gap: 0.75rem;
+            min-height: 250px;
+        }
+        .msg-me, .msg-other { max-width: 80%; display: flex; flex-direction: column; }
+        .msg-me { align-self: flex-end; align-items: flex-end; }
+        .msg-other { align-self: flex-start; }
+        .msg-bubble {
+            padding: 0.6rem 1rem; border-radius: 14px;
+            font-size: 0.9rem; line-height: 1.4; word-break: break-word;
+        }
+        .msg-me .msg-bubble    { background: var(--primary); color: white; border-bottom-right-radius: 3px; }
+        .msg-other .msg-bubble { background: white; border: 1px solid var(--border); color: var(--text); border-bottom-left-radius: 3px; }
+        .msg-time { font-size: 0.68rem; color: #94a3b8; margin-top: 0.2rem; }
+        .chat-input-area {
+            padding: 0.85rem 1rem; background: white; border-top: 1px solid var(--border);
+            display: flex; gap: 0.5rem; align-items: center;
+        }
+        .chat-input {
+            flex: 1; border: 1.5px solid var(--border); border-radius: 99px;
+            padding: 0.55rem 1rem; font-family: inherit; font-size: 0.9rem; outline: none; transition: 0.2s;
+        }
+        .chat-input:focus { border-color: var(--primary); }
+        .chat-send {
+            background: var(--primary); color: white; border: none;
+            border-radius: 99px; padding: 0.55rem 1.2rem;
+            font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .chat-send:hover { background: var(--primary-dark); }
+
+        /* REVIEW MODAL */
+        #reviewModal {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55); z-index: 9999;
+            align-items: center; justify-content: center;
+        }
+        #reviewModal.open { display: flex; }
+        .review-box {
+            background: white; width: 90%; max-width: 420px;
+            border-radius: 18px; padding: 2rem; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+        .review-title { font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+        .stars-row { display: flex; gap: 0.4rem; margin-bottom: 1rem; font-size: 2rem; cursor: pointer; }
+        .star { color: #e2e8f0; transition: color 0.15s; }
+        .star.lit { color: #fbbf24; }
+        .review-textarea {
+            width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 0.85rem;
+            font-family: inherit; font-size: 0.9rem; resize: none; outline: none; margin-bottom: 1rem; transition: 0.2s;
+        }
+        .review-textarea:focus { border-color: var(--primary); }
+        .review-btns { display: flex; gap: 0.75rem; }
+        .review-btns button { flex: 1; padding: 0.85rem; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .btn-cancel-review { background: #f1f5f9; color: var(--text-muted); }
+        .btn-submit-review { background: var(--primary); color: white; }
+
+        .loading { text-align: center; padding: 3rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/" class="nav-logo">NTDV<span>·</span>home</a>
+    <div class="nav-right">
+        <a href="/" class="nav-link">🏠 Trang chủ</a>
+        <a href="/profile" class="nav-link">👤 Hồ sơ</a>
+        <div class="nav-avatar" id="navAvatar">?</div>
+    </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-icon">📋</div>
+    <div>
+        <h1>Đơn dịch vụ của tôi</h1>
+        <p>Theo dõi trạng thái, nhắn tin với thợ và đánh giá dịch vụ</p>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="tabs">
+        <button class="tab active" onclick="filterTab('all', this)">Tất cả (<span id="cnt-all">0</span>)</button>
+        <button class="tab" onclick="filterTab('pending', this)">⏳ Chờ thợ (<span id="cnt-pending">0</span>)</button>
+        <button class="tab" onclick="filterTab('in_progress', this)">🛠 Đang thực hiện (<span id="cnt-inprog">0</span>)</button>
+        <button class="tab" onclick="filterTab('completed', this)">✅ Hoàn thành (<span id="cnt-done">0</span>)</button>
+        <button class="tab" onclick="filterTab('cancelled', this)">❌ Đã hủy (<span id="cnt-cancel">0</span>)</button>
+    </div>
+
+    <div id="ordersList">
+        <div class="loading">⏳ Đang tải đơn hàng...</div>
+    </div>
+</div>
+
+<!-- CHAT MODAL -->
+<div id="chatModal">
+    <div class="chat-box">
+        <div class="chat-head">
+            <div>
+                <div class="chat-head-name" id="chatWorkerName">Thợ</div>
+                <div class="chat-head-sub" id="chatOrderLabel">Đơn hàng</div>
+            </div>
+            <button class="chat-close" onclick="closeChat()">✕</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div style="text-align:center;color:#94a3b8;font-size:0.85rem;margin-top:2rem;">Chưa có tin nhắn nào.</div>
+        </div>
+        <div class="chat-input-area">
+            <input class="chat-input" id="chatInput" placeholder="Nhập tin nhắn..." onkeypress="if(event.key==='Enter') sendMsg()">
+            <button class="chat-send" onclick="sendMsg()">Gửi</button>
+        </div>
+    </div>
+</div>
+
+<!-- REVIEW MODAL -->
+<div id="reviewModal">
+    <div class="review-box">
+        <div class="review-title">⭐ Đánh giá dịch vụ</div>
+        <div class="stars-row" id="starsRow">
+            <span class="star" onclick="setStar(1)">★</span>
+            <span class="star" onclick="setStar(2)">★</span>
+            <span class="star" onclick="setStar(3)">★</span>
+            <span class="star" onclick="setStar(4)">★</span>
+            <span class="star" onclick="setStar(5)">★</span>
+        </div>
+        <textarea class="review-textarea" id="reviewComment" rows="4" placeholder="Nhận xét về chất lượng dịch vụ..."></textarea>
+        <div class="review-btns">
+            <button class="btn-cancel-review" onclick="closeReview()">Hủy</button>
+            <button class="btn-submit-review" onclick="submitReview()">Gửi đánh giá</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentUserId = null;
+    let allOrders = [];
+    let activeChatBookingId = null;
+    let chatInterval = null;
+    let reviewBookingId = null;
+    let reviewProviderId = null;
+    let selectedStar = 5;
+
+    // ── INIT ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', async () => {
+        const info = localStorage.getItem('userInfo');
+        if (!info) { window.location.href = '/login'; return; }
+        const u = JSON.parse(info);
+        currentUserId = u.id;
+
+        // Avatar initials
+        const av = document.getElementById('navAvatar');
+        if (u.name) av.textContent = u.name.charAt(0).toUpperCase();
+
+        await loadOrders();
+    });
+
+    // ── LOAD ORDERS ───────────────────────────────────────
+    async function loadOrders() {
+        try {
+            const res = await fetch(`/api/user/${currentUserId}/bookings`);
+            allOrders = await res.json();
+
+            // Count
+            document.getElementById('cnt-all').textContent    = allOrders.length;
+            document.getElementById('cnt-pending').textContent = allOrders.filter(o => o.status === 'pending').length;
+            document.getElementById('cnt-inprog').textContent  = allOrders.filter(o => ['accepted','in_progress'].includes(o.status)).length;
+            document.getElementById('cnt-done').textContent    = allOrders.filter(o => o.status === 'completed').length;
+            document.getElementById('cnt-cancel').textContent  = allOrders.filter(o => o.status === 'cancelled').length;
+
+            renderOrders(allOrders);
+        } catch(e) {
+            document.getElementById('ordersList').innerHTML =
+                '<div class="empty"><div class="empty-icon">⚠️</div><h3>Không thể tải đơn hàng</h3><p>Vui lòng thử lại sau.</p></div>';
+        }
+    }
+
+    function renderOrders(orders) {
+        const el = document.getElementById('ordersList');
+        if (!orders.length) {
+            el.innerHTML = `<div class="empty">
+                <div class="empty-icon">📭</div>
+                <h3>Chưa có đơn hàng nào</h3>
+                <p>Hãy đặt dịch vụ đầu tiên của bạn!</p>
+                <a href="/" style="display:inline-block;margin-top:1rem;padding:0.75rem 2rem;background:var(--primary);color:white;border-radius:10px;text-decoration:none;font-weight:700;">Khám phá dịch vụ</a>
+            </div>`;
+            return;
+        }
+
+        el.innerHTML = orders.map(o => {
+            const isActive = ['pending','accepted','in_progress'].includes(o.status);
+            const isDone   = o.status === 'completed';
+            const isCancelled = o.status === 'cancelled';
+
+            let badgeClass = 'badge-pending', badgeText = '⏳ Chờ thợ';
+            if (['accepted','in_progress'].includes(o.status)) { badgeClass = 'badge-inprog'; badgeText = '🛠 Đang thực hiện'; }
+            else if (isDone)      { badgeClass = 'badge-done';   badgeText = '✅ Hoàn thành'; }
+            else if (isCancelled) { badgeClass = 'badge-cancel'; badgeText = '❌ Đã hủy'; }
+
+            const workerInfo = o.provider_name
+                ? `<div class="info-row"><span class="info-key">Thợ:</span><span class="info-val">👷 ${o.provider_name}</span></div>`
+                : `<div class="info-row"><span class="info-key">Thợ:</span><span class="info-val" style="color:#94a3b8;">Chưa có thợ nhận</span></div>`;
+
+            let actions = '';
+            if (isActive && o.provider_id) {
+                actions += `<button class="btn btn-chat" onclick="openChat(${o.id}, '${(o.provider_name||'Thợ').replace(/'/g,"\\'")}', ${o.provider_id})">💬 Nhắn tin với thợ</button>`;
+            }
+            if (isActive && o.status === 'pending') {
+                actions += `<button class="btn btn-cancel" onclick="cancelOrder(${o.id})">✕ Hủy đơn</button>`;
+            }
+            if (isDone && o.provider_id) {
+                actions += `<button class="btn btn-review" onclick="openReview(${o.id}, ${o.provider_id})">⭐ Đánh giá</button>`;
+            }
+            if (isDone || isCancelled) {
+                actions += `<button class="btn btn-rebook" onclick="window.location.href='/'">🔄 Đặt lại</button>`;
+            }
+
+            const filterStatus = ['accepted','in_progress'].includes(o.status) ? 'in_progress' : o.status;
+
+            return `<div class="order-card" data-status="${filterStatus}">
+                <div class="order-header">
+                    <div>
+                        <div class="order-id">#NTH-${o.id} · ${o.service_name}</div>
+                        <div class="order-date">📅 ${o.time || 'Chưa xác định'}</div>
+                    </div>
+                    <span class="badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="order-body">
+                    <div class="order-info">
+                        <div class="info-row"><span class="info-key">Gói:</span><span class="info-val">${o.package_name || '—'}</span></div>
+                        ${workerInfo}
+                        <div class="info-row"><span class="info-key">Giá:</span><span class="info-val" style="color:var(--primary);">${o.total_amount ? Number(o.total_amount).toLocaleString('vi-VN') + ' đ' : '—'}</span></div>
+                    </div>
+                    <div class="order-actions">${actions || '<span style="color:#94a3b8;font-size:0.82rem;">Không có thao tác</span>'}</div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── FILTER TABS ───────────────────────────────────────
+    function filterTab(status, btn) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        if (status === 'all') { renderOrders(allOrders); return; }
+        renderOrders(allOrders.filter(o => {
+            const s = ['accepted','in_progress'].includes(o.status) ? 'in_progress' : o.status;
+            return s === status;
+        }));
+    }
+
+    // ── CANCEL ORDER ──────────────────────────────────────
+    async function cancelOrder(id) {
+        if (!confirm('Xác nhận hủy đơn hàng này?')) return;
+        try {
+            const res = await fetch(`/api/bookings/${id}/status`, {
+                method: 'PUT', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ status: 'cancelled' })
+            });
+            if (res.ok) { alert('Đã hủy đơn hàng.'); await loadOrders(); }
+            else { const d = await res.json(); alert('Lỗi: ' + d.message); }
+        } catch { alert('Không thể kết nối server!'); }
+    }
+
+    // ── CHAT ──────────────────────────────────────────────
+    function openChat(bookingId, workerName, providerId) {
+        activeChatBookingId = bookingId;
+        document.getElementById('chatWorkerName').textContent = workerName;
+        document.getElementById('chatOrderLabel').textContent = `Đơn hàng #${bookingId}`;
+        document.getElementById('chatModal').classList.add('open');
+        loadChat();
+        chatInterval = setInterval(loadChat, 3000);
+    }
+
+    function closeChat() {
+        document.getElementById('chatModal').classList.remove('open');
+        clearInterval(chatInterval);
+        activeChatBookingId = null;
+    }
+
+    async function loadChat() {
+        if (!activeChatBookingId) return;
+        try {
+            const res = await fetch(`/api/bookings/${activeChatBookingId}/chat`);
+            if (!res.ok) return;
+            const msgs = await res.json();
+            const box = document.getElementById('chatMessages');
+
+            if (!msgs.length) {
+                box.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:0.85rem;margin-top:2rem;">Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện!</div>';
+                return;
+            }
+
+            box.innerHTML = msgs.map(m => {
+                const isMe = m.sender_type === 'customer';
+                return `<div class="${isMe ? 'msg-me' : 'msg-other'}">
+                    <div class="msg-bubble">${m.message}</div>
+                    <div class="msg-time">${m.time} · ${isMe ? 'Bạn' : 'Thợ'}</div>
+                </div>`;
+            }).join('');
+            box.scrollTop = box.scrollHeight;
+        } catch(e) { console.error(e); }
+    }
+
+    async function sendMsg() {
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text || !activeChatBookingId) return;
+
+        // Optimistic UI
+        const box = document.getElementById('chatMessages');
+        const now = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        const tempId = 'tmp-' + Date.now();
+        box.innerHTML += `<div id="${tempId}" class="msg-me">
+            <div class="msg-bubble" style="opacity:0.7">${text}</div>
+            <div class="msg-time">${now} · Bạn ⏳</div>
+        </div>`;
+        box.scrollTop = box.scrollHeight;
+        input.value = '';
+
+        try {
+            const res = await fetch(`/api/bookings/${activeChatBookingId}/chat`, {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ sender_type: 'customer', message: text })
+            });
+            if (res.ok) { await loadChat(); }
+            else {
+                const d = await res.json();
+                alert('Gửi thất bại: ' + d.message);
+                document.getElementById(tempId)?.remove();
+                input.value = text;
+            }
+        } catch { alert('Không thể kết nối server!'); }
+    }
+
+    // ── REVIEW ────────────────────────────────────────────
+    function openReview(bookingId, providerId) {
+        reviewBookingId = bookingId; reviewProviderId = providerId; selectedStar = 5;
+        setStar(5);
+        document.getElementById('reviewComment').value = '';
+        document.getElementById('reviewModal').classList.add('open');
+    }
+    function closeReview() { document.getElementById('reviewModal').classList.remove('open'); }
+
+    function setStar(n) {
+        selectedStar = n;
+        document.querySelectorAll('#starsRow .star').forEach((s, i) => {
+            s.classList.toggle('lit', i < n);
+        });
+    }
+
+    async function submitReview() {
+        const comment = document.getElementById('reviewComment').value.trim();
+        if (!comment) { alert('Vui lòng nhập nhận xét!'); return; }
+        try {
+            const res = await fetch('/api/bookings/review', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({
+                    booking_id: reviewBookingId,
+                    provider_id: reviewProviderId,
+                    user_id: currentUserId,
+                    rating_star: selectedStar,
+                    comment
+                })
+            });
+            const d = await res.json();
+            if (res.ok) { alert('🎉 Cảm ơn bạn đã đánh giá!'); closeReview(); }
+            else alert('Lỗi: ' + d.message);
+        } catch { alert('Không thể kết nối server!'); }
+    }
+</script>
+</body>
+</html>

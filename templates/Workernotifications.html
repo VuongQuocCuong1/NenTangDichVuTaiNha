@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông báo - Thợ NTDVhome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS CHUNG */
+        :root { --primary: #0f52ba; --primary-dark: #0a3d8f; --accent: #ff6b35; --accent-2: #00c896; --bg: #f0f4ff; --text: #0d1b2a; --text-muted: #5a6a7a; --border: #e2e8f0; --shadow: 0 4px 24px rgba(15,82,186,0.10); }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: block; min-height: 100vh; }
+        .worker-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #0f52ba, #0a3d8f); padding: 2rem 1.5rem; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+        .sidebar-logo { font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 700; color: white; margin-bottom: 0.25rem; }
+        .sidebar-logo span { color: #fbbf24; }
+        .sidebar-role { color: #93c5fd; font-size: 0.8rem; margin-bottom: 2.5rem; }
+        .sidebar-worker { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px; margin-bottom: 2rem; }
+        .sw-avatar { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .sw-name { color: white; font-weight: 700; font-size: 0.9rem; }
+        .sw-status { color: #86efac; font-size: 0.75rem; }
+        .sidebar-nav { flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 10px; margin-bottom: 0.25rem; color: #93c5fd; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: rgba(255,255,255,0.15); color: white; font-weight: 700; }
+        .sidebar-footer { margin-top: auto; }
+        .btn-logout-side { width: 100%; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 0.75rem; border-radius: 10px; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-logout-side:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .main { margin-left: 260px; padding: 2rem; flex: 1; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .page-title { font-family: 'Sora', sans-serif; font-size: 1.6rem; font-weight: 700; }
+        .page-sub { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } }
+
+        /* NOTIFICATION STYLES */
+        .noti-item { background: white; border-radius: 12px; padding: 1.25rem; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 1rem; display: flex; gap: 1rem; align-items: flex-start; transition: all 0.2s; }
+        .noti-item:hover { border-color: var(--primary-light); }
+        .noti-item.unread { background: #eff6ff; border-left: 4px solid var(--primary); }
+        .noti-icon { font-size: 1.5rem; flex-shrink: 0; }
+        .noti-content h4 { font-size: 1rem; color: var(--text); margin-bottom: 0.25rem; }
+        .noti-content p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+        .noti-time { font-size: 0.75rem; color: #94a3b8; margin-top: 0.5rem; display: block; }
+    </style>
+</head>
+<body>
+<div class="worker-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">NTDV<span>·</span>home</div>
+        <div class="sidebar-role">🛠️ Cổng thông tin Thợ</div>
+
+        <div class="sidebar-worker">
+            <div class="sw-avatar">👷</div>
+            <div>
+                <div class="sw-name">Đang tải...</div>
+                <div class="sw-status">🟢 Đang hoạt động</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a class="nav-item" href="/worker/orders">📋 Đơn hàng của tôi</a>
+            <a class="nav-item" href="/worker/location">📍 Vị trí của tôi</a>
+            <a class="nav-item" href="/worker/income">📊 Thu nhập</a>
+            <a class="nav-item" href="/worker/reviews">⭐ Đánh giá</a>
+            <a class="nav-item" href="/profile">👤 Hồ sơ</a>
+            <a class="nav-item active" href="/worker/notifications">🔔 Thông báo <span class="badge" style="background:var(--accent); color:white; padding:2px 6px; border-radius:99px; font-size:0.7rem; margin-left:auto;">2</span></a>
+            <a class="nav-item" href="/worker/settings">⚙️ Cài đặt</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout-side" onclick="window.location.href='/'">← Về trang chủ</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">🔔 Thông báo</div>
+                <div class="page-sub">Cập nhật đơn hàng và tin tức từ hệ thống</div>
+            </div>
+            <button style="background:transparent; border:none; color:var(--primary); font-weight:600; cursor:pointer;">Đánh dấu đã đọc tất cả</button>
+        </div>
+
+        <!-- Mẫu thông báo chưa đọc -->
+        <div class="noti-item unread">
+            <div class="noti-icon">🎉</div>
+            <div class="noti-content">
+                <h4>Hồ sơ của bạn đã được duyệt!</h4>
+                <p>Chào mừng bạn gia nhập cộng đồng đối tác NTDVhome. Hãy bật "Sẵn sàng nhận đơn" để bắt đầu làm việc nhé.</p>
+                <span class="noti-time">Hôm nay, 08:30</span>
+            </div>
+        </div>
+
+        <div class="noti-item unread">
+            <div class="noti-icon">💰</div>
+            <div class="noti-content">
+                <h4>Chương trình thưởng cuối tuần</h4>
+                <p>Hoàn thành 5 đơn hàng trong thứ Bảy và Chủ Nhật tuần này để nhận ngay khoản thưởng 200.000đ từ hệ thống.</p>
+                <span class="noti-time">Hôm qua, 15:00</span>
+            </div>
+        </div>
+
+        <!-- Mẫu thông báo đã đọc -->
+        <div class="noti-item">
+            <div class="noti-icon">⚙️</div>
+            <div class="noti-content">
+                <h4>Cập nhật hệ thống</h4>
+                <p>Bảo trì hệ thống định kỳ vào rạng sáng Chủ Nhật (2h - 4h). Trong thời gian này tính năng nhận đơn sẽ tạm gián đoạn.</p>
+                <span class="noti-time">3 ngày trước</span>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (!userInfoStr) { window.location.href = '/login'; return; }
+        const u = JSON.parse(userInfoStr);
+        try {
+            const resProv = await fetch('/api/admin/providers');
+            const providers = await resProv.json();
+            const currentProvider = providers.find(p => p.phone === u.phone && p.verified === true);
+            if (currentProvider) {
+                document.querySelector('.sw-name').innerText = currentProvider.name;
+                if (currentProvider.avatar) { document.querySelector('.sw-avatar').innerHTML = `<img src="${currentProvider.avatar}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`; }
+            }
+        } catch (error) { console.error("Lỗi:", error); }
+    });
+</script>
+</body>
+</html>

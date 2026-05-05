@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đánh giá - Thợ NTDVhome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS CHUNG */
+        :root { --primary: #0f52ba; --primary-dark: #0a3d8f; --accent: #ff6b35; --accent-2: #00c896; --bg: #f0f4ff; --text: #0d1b2a; --text-muted: #5a6a7a; --border: #e2e8f0; --shadow: 0 4px 24px rgba(15,82,186,0.10); }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: block; min-height: 100vh; }
+        .worker-layout { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: linear-gradient(180deg, #0f52ba, #0a3d8f); padding: 2rem 1.5rem; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; }
+        .sidebar-logo { font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 700; color: white; margin-bottom: 0.25rem; }
+        .sidebar-logo span { color: #fbbf24; }
+        .sidebar-role { color: #93c5fd; font-size: 0.8rem; margin-bottom: 2.5rem; }
+        .sidebar-worker { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px; margin-bottom: 2rem; }
+        .sw-avatar { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .sw-name { color: white; font-weight: 700; font-size: 0.9rem; }
+        .sw-status { color: #86efac; font-size: 0.75rem; }
+        .sidebar-nav { flex: 1; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: 10px; margin-bottom: 0.25rem; color: #93c5fd; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: rgba(255,255,255,0.15); color: white; font-weight: 700; }
+        .sidebar-footer { margin-top: auto; }
+        .btn-logout-side { width: 100%; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 0.75rem; border-radius: 10px; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-logout-side:hover { background: #dc2626; color: white; border-color: #dc2626; }
+        .main { margin-left: 260px; padding: 2rem; flex: 1; }
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .page-title { font-family: 'Sora', sans-serif; font-size: 1.6rem; font-weight: 700; }
+        .page-sub { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem; }
+        @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } }
+
+        /* CSS RIÊNG CHO TRANG ĐÁNH GIÁ */
+        .review-card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+        .review-stars { color: #fbbf24; font-size: 1.2rem; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+<div class="worker-layout">
+
+    <aside class="sidebar">
+        <div class="sidebar-logo">NTDV<span>·</span>home</div>
+        <div class="sidebar-role">🛠️ Cổng thông tin Thợ</div>
+
+        <div class="sidebar-worker">
+            <div class="sw-avatar">👷</div>
+            <div>
+                <div class="sw-name">Đang tải...</div>
+                <div class="sw-status">🟢 Đang hoạt động</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a class="nav-item" href="/worker/orders">📋 Đơn hàng của tôi</a>
+            <a class="nav-item" href="/worker/location">📍 Vị trí của tôi</a>
+            <a class="nav-item" href="/worker/income">📊 Thu nhập</a>
+            <a class="nav-item active" href="/worker/reviews">⭐ Đánh giá</a>
+            <a class="nav-item" href="/profile">👤 Hồ sơ</a>
+            <a class="nav-item" href="/worker/notifications">🔔 Thông báo</a>
+            <a class="nav-item" href="/worker/settings">⚙️ Cài đặt</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout-side" onclick="window.location.href='/'">← Về trang chủ</button>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">⭐ Đánh giá từ khách hàng</div>
+                <div class="page-sub">Xem phản hồi để cải thiện chất lượng dịch vụ</div>
+            </div>
+        </div>
+
+        <!-- VÙNG CHỨA DANH SÁCH ĐÁNH GIÁ ĐỘNG -->
+        <div id="reviewsList">
+            <p style="text-align:center; padding:2rem; color:#6b7280;">Đang tải đánh giá từ hệ thống...</p>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (!userInfoStr) { window.location.href = '/login'; return; }
+        const u = JSON.parse(userInfoStr);
+
+        try {
+            // 1. Xác thực tài khoản Thợ
+            const resProv = await fetch('/api/admin/providers');
+            const providers = await resProv.json();
+            const currentProvider = providers.find(p => p.phone === u.phone && p.verified === true);
+
+            if (!currentProvider) return; // Nếu không phải thợ thì dừng
+
+            // Cập nhật Avatar và Tên thợ ở Sidebar
+            document.querySelector('.sw-name').innerText = currentProvider.name;
+            if (currentProvider.avatar) {
+                document.querySelector('.sw-avatar').innerHTML = `<img src="${currentProvider.avatar}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            }
+
+            // 2. Gọi API lấy Đánh giá thật từ Database
+            const resReviews = await fetch(`/api/provider/${currentProvider.id}/reviews`);
+            const reviews = await resReviews.json();
+            const container = document.getElementById('reviewsList');
+
+            if (reviews.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:2rem; color:#6b7280; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">Bạn chưa có đánh giá nào.</p>';
+                return;
+            }
+
+            // 3. Đổ dữ liệu thật ra giao diện
+            container.innerHTML = reviews.map(r => {
+                // Tạo chuỗi ngôi sao tương ứng
+                let starsHtml = '';
+                for(let i=1; i<=5; i++) {
+                    starsHtml += i <= r.stars ? '★' : '☆';
+                }
+
+                return `
+                <div class="review-card">
+                    <div class="review-header">
+                        <strong>${r.customer_name}</strong>
+                        <span class="review-stars">${starsHtml}</span>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Dịch vụ: ${r.service_name}</p>
+                    <p style="color: #334155; font-style: italic;">"${r.comment}"</p>
+                </div>`;
+            }).join('');
+
+        } catch (error) { 
+            console.error("Lỗi:", error); 
+            document.getElementById('reviewsList').innerHTML = '<p style="text-align:center; padding:2rem; color:red;">Lỗi kết nối Server!</p>';
+        }
+    });
+</script>
+</body>
+</html>

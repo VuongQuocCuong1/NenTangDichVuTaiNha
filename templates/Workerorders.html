@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đơn hàng của tôi - Thợ NTDVhome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f52ba; --primary-dark: #0a3d8f;
+            --accent: #ff6b35; --accent-2: #00c896;
+            --bg: #f0f4ff; --text: #0d1b2a; --text-muted: #5a6a7a;
+            --border: #e2e8f0; --shadow: 0 4px 24px rgba(15,82,186,0.10);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); display: block; min-height: 100vh; }
+
+        /* LAYOUT */
+        .worker-layout { display: flex; min-height: 100vh; }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px; background: linear-gradient(180deg, #0f52ba, #0a3d8f);
+            padding: 2rem 1.5rem; display: flex; flex-direction: column;
+            position: fixed; top: 0; left: 0; bottom: 0; z-index: 50;
+        }
+        .sidebar-logo { font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 700; color: white; margin-bottom: 0.25rem; }
+        .sidebar-logo span { color: #fbbf24; }
+        .sidebar-role { color: #93c5fd; font-size: 0.8rem; margin-bottom: 2.5rem; }
+
+        .sidebar-worker { display: flex; align-items: center; gap: 0.75rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: 12px; margin-bottom: 2rem; }
+        .sw-avatar { width: 44px; height: 44px; border-radius: 12px; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .sw-name { color: white; font-weight: 700; font-size: 0.9rem; }
+        .sw-status { color: #86efac; font-size: 0.75rem; }
+
+        .sidebar-nav { flex: 1; }
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.85rem 1rem; border-radius: 10px; margin-bottom: 0.25rem;
+            color: #93c5fd; font-weight: 500; font-size: 0.9rem;
+            cursor: pointer; transition: all 0.2s; text-decoration: none;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; }
+        .nav-item.active { background: rgba(255,255,255,0.15); color: white; font-weight: 700; }
+        .nav-item .badge { background: var(--accent); color: white; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 99px; margin-left: auto; }
+
+        .sidebar-footer { margin-top: auto; }
+        .btn-logout-side { width: 100%; background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; padding: 0.75rem; border-radius: 10px; font-family: inherit; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-logout-side:hover { background: #dc2626; color: white; border-color: #dc2626; }
+
+        /* MAIN CONTENT */
+        .main { margin-left: 260px; padding: 2rem; flex: 1; }
+
+        /* TOPBAR */
+        .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .page-title { font-family: 'Sora', sans-serif; font-size: 1.6rem; font-weight: 700; }
+        .page-sub { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.2rem; }
+
+        .status-toggle { display: flex; gap: 0.5rem; align-items: center; }
+        .toggle-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+        .toggle-btn { position: relative; width: 52px; height: 28px; }
+        .toggle-btn input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; inset: 0; background: #e2e8f0; border-radius: 99px; cursor: pointer; transition: 0.3s; }
+        .toggle-slider::before { content: ''; position: absolute; width: 22px; height: 22px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
+        input:checked + .toggle-slider { background: var(--accent-2); }
+        input:checked + .toggle-slider::before { transform: translateX(24px); }
+
+        /* STATS */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 14px; padding: 1.25rem; border: 1px solid var(--border); }
+        .stat-card .num { font-family: 'Sora', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+        .stat-card .lbl { color: var(--text-muted); font-size: 0.8rem; margin-top: 0.25rem; }
+        .stat-card .trend { color: var(--accent-2); font-size: 0.78rem; font-weight: 600; margin-top: 0.4rem; }
+
+        /* ORDER CARDS */
+        .section-title { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem; }
+        .order-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .order-tab { padding: 0.5rem 1.25rem; border-radius: 99px; border: 1.5px solid var(--border); background: white; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .order-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .order-card {
+            background: white; border-radius: 16px; border: 1px solid var(--border);
+            overflow: hidden; margin-bottom: 1.25rem; transition: all 0.2s;
+        }
+        .order-card:hover { box-shadow: var(--shadow); }
+        .order-header { padding: 1.25rem 1.5rem; display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #f1f5f9; }
+        .order-id { font-family: 'Sora', sans-serif; font-weight: 700; color: var(--primary); }
+        .order-date { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem; }
+        .order-status { padding: 0.35rem 0.85rem; border-radius: 99px; font-size: 0.75rem; font-weight: 700; }
+        .status-pending { background: #fef3c7; color: #d97706; }
+        .status-inprog { background: #dbeafe; color: #1d4ed8; }
+        .status-done { background: #d1fae5; color: #059669; }
+
+        .order-body { padding: 1.25rem 1.5rem; display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
+        .order-info { flex: 1; min-width: 200px; }
+        .oi-row { display: flex; gap: 0.5rem; margin-bottom: 0.6rem; font-size: 0.88rem; }
+        .oi-key { color: var(--text-muted); font-weight: 500; min-width: 80px; }
+        .oi-val { font-weight: 600; color: var(--text); }
+
+        .order-actions { display: flex; flex-direction: column; gap: 0.5rem; min-width: 160px; }
+        .btn-action { padding: 0.6rem 1rem; border-radius: 8px; border: none; font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .btn-accept { background: var(--accent-2); color: white; }
+        .btn-accept:hover { background: #00a87a; }
+        .btn-directions { background: #eff6ff; color: var(--primary); }
+        .btn-directions:hover { background: var(--primary); color: white; }
+        .btn-proof { background: #fff7ed; color: var(--accent); border: 1px solid #fed7aa; }
+        .btn-proof:hover { background: var(--accent); color: white; border-color: var(--accent); }
+        .btn-complete { background: var(--primary); color: white; }
+        .btn-complete:hover { background: var(--primary-dark); }
+        .btn-chat-sm { background: #f1f5f9; color: var(--text-muted); }
+        .btn-chat-sm:hover { background: var(--text); color: white; }
+
+        /* PROOF MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-box { background: white; border-radius: 20px; padding: 2rem; max-width: 520px; width: 90%; max-height: 90vh; overflow-y: auto; }
+        .modal-title { font-family: 'Sora', sans-serif; font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .modal-sub { color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem; }
+        .photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .photo-upload {
+            border: 2px dashed var(--border); border-radius: 12px; height: 140px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+        }
+        .photo-upload:hover { border-color: var(--primary); background: #eff6ff; }
+        .photo-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+        .photo-upload .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .photo-upload .label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+        .photo-upload .sub { font-size: 0.72rem; color: #94a3b8; }
+        .photo-preview { display: none; position: absolute; inset: 0; }
+        .photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+        .modal-warning { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 0.85rem; font-size: 0.82rem; color: #92400e; margin-bottom: 1.25rem; line-height: 1.5; }
+        .modal-btns { display: flex; gap: 0.75rem; }
+        .modal-btns button { flex: 1; padding: 0.85rem; border-radius: 10px; border: none; font-family: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .btn-cancel-modal { background: #f1f5f9; color: var(--text-muted); }
+        .btn-cancel-modal:hover { background: #e2e8f0; }
+        .btn-submit-proof { background: var(--primary); color: white; }
+        .btn-submit-proof:hover { background: var(--primary-dark); }
+
+        /* REMINDER NOTICE */
+        .reminder-notice { background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fcd34d; border-radius: 14px; padding: 1.25rem; margin-bottom: 2rem; display: flex; gap: 1rem; align-items: flex-start; }
+        .rn-icon { font-size: 1.75rem; flex-shrink: 0; }
+        .rn-title { font-weight: 700; color: #92400e; margin-bottom: 0.3rem; }
+        .rn-text { color: #78350f; font-size: 0.85rem; line-height: 1.5; }
+
+        @media (max-width: 768px) {
+            .sidebar { display: none; }
+            .main { margin-left: 0; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="worker-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">NTDV<span>·</span>home</div>
+        <div class="sidebar-role">🛠️ Cổng thông tin Thợ</div>
+
+        <div class="sidebar-worker">
+            <div class="sw-avatar">👩‍🦱</div>
+            <div>
+                <div class="sw-name">Nguyễn Thị Lan</div>
+                <div class="sw-status">🟢 Đang hoạt động</div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a class="nav-item active" href="/worker/orders">📋 Đơn hàng của tôi</a>
+            <a class="nav-item" href="/worker/location">📍 Vị trí của tôi</a>
+            <a class="nav-item" href="/worker/income">📊 Thu nhập</a>
+            <a class="nav-item" href="/worker/reviews">⭐ Đánh giá</a>
+            <a class="nav-item" href="/profile">👤 Hồ sơ</a>
+            <a class="nav-item" href="/worker/notifications">🔔 Thông báo</a>
+            <a class="nav-item" href="/worker/settings">⚙️ Cài đặt</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <button class="btn-logout-side" onclick="window.location.href='/'">← Về trang chủ</button>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+        <div class="topbar">
+            <div>
+                <div class="page-title">📋 Đơn hàng của tôi</div>
+                <div class="page-sub">Quản lý và theo dõi các đơn dịch vụ</div>
+            </div>
+            <div class="status-toggle">
+                <span class="toggle-label">Sẵn sàng nhận đơn</span>
+                <label class="toggle-btn">
+                    <input type="checkbox" checked onchange="toggleStatus(this)">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+
+       <!-- STATS (Đã gắn ID để cập nhật động) -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="num" id="stat-total">0</div>
+                <div class="lbl">Tổng đơn hàng</div>
+                <div class="trend" style="color:var(--text-muted);">Cập nhật thực tế</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="stat-pending">0</div>
+                <div class="lbl">Đơn đang chờ</div>
+                <div class="trend" style="color:var(--accent);">🔔 Cần xác nhận</div>
+            </div>
+            <div class="stat-card">
+                <div class="num" id="stat-income">0 đ</div>
+                <div class="lbl">Thu nhập (đ)</div>
+                <div class="trend" style="color:var(--accent-2);">Chỉ tính đơn hoàn thành</div>
+            </div>
+            <div class="stat-card">
+                <div class="num">5.0 ⭐</div>
+                <div class="lbl">Đánh giá TB</div>
+                <div class="trend">Hệ thống ghi nhận</div>
+            </div>
+        </div>
+
+        <!-- TABS (Đã gắn ID để đếm số lượng) -->
+        <div class="order-tabs">
+            <button class="order-tab active" onclick="filterOrders('all', this)">Tất cả (<span id="count-all">0</span>)</button>
+            <button class="order-tab" onclick="filterOrders('pending', this)">Chờ xác nhận (<span id="count-pending">0</span>)</button>
+            <button class="order-tab" onclick="filterOrders('in_progress', this)">Đang thực hiện (<span id="count-inprog">0</span>)</button>
+            <button class="order-tab" onclick="filterOrders('completed', this)">Hoàn thành (<span id="count-done">0</span>)</button>
+        </div>
+
+        <!-- VÙNG CHỨA DANH SÁCH ĐƠN HÀNG ĐỘNG -->
+        <div id="ordersList">
+            <p style="text-align:center; padding:2rem; color:#6b7280;">Đang tải danh sách đơn hàng...</p>
+        </div>
+
+    </main>
+</div>
+
+<!-- PROOF PHOTO MODAL -->
+<div class="modal-overlay" id="proofModal">
+    <div class="modal-box">
+        <div class="modal-title">📸 Ảnh minh chứng</div>
+        <div class="modal-sub">Chụp ảnh TRƯỚC và SAU khi hoàn thành để bảo vệ quyền lợi cả hai bên</div>
+
+        <div class="photo-grid">
+            <div class="photo-upload" onclick="triggerUpload('before')">
+                <input type="file" id="upload-before" accept="image/*" onchange="previewPhoto(this, 'before')">
+                <div class="icon">📷</div>
+                <div class="label">Ảnh TRƯỚC</div>
+                <div class="sub">Tình trạng ban đầu</div>
+                <div class="photo-preview" id="preview-before"><img></div>
+            </div>
+            <div class="photo-upload" onclick="triggerUpload('after')">
+                <input type="file" id="upload-after" accept="image/*" onchange="previewPhoto(this, 'after')">
+                <div class="icon">✨</div>
+                <div class="label">Ảnh SAU</div>
+                <div class="sub">Kết quả hoàn thành</div>
+                <div class="photo-preview" id="preview-after"><img></div>
+            </div>
+        </div>
+
+        <div class="modal-warning">
+            ⚠️ <b>Lưu ý quan trọng:</b> Ảnh minh chứng là bắt buộc trước khi nhấn "Hoàn thành dịch vụ". Ảnh sẽ được lưu trữ và dùng để giải quyết tranh chấp nếu có.
+        </div>
+
+        <div class="modal-btns">
+            <button class="btn-cancel-modal" onclick="document.getElementById('proofModal').classList.remove('show')">Đóng</button>
+            <button class="btn-submit-proof" onclick="submitProof()">✅ Lưu ảnh & Hoàn thành</button>
+        </div>
+    </div>
+</div>
+
+<!-- CỬA SỔ CHAT DÀNH CHO THỢ (MẶC ĐỊNH ẨN) -->
+<div id="workerChatModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: white; width: 90%; max-width: 400px; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; flex-direction: column;">
+        <!-- Header Chat -->
+        <div style="background: #1d4ed8; color: white; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <div style="font-weight: 700; font-size: 1.1rem;" id="chatCustomerName">Khách hàng</div>
+                <div style="font-size: 0.8rem; opacity: 0.8;" id="chatOrderId">Đang kết nối...</div>
+            </div>
+            <button onclick="closeWorkerChat()" style="background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;">✕</button>
+        </div>
+        
+        <!-- Khung chứa tin nhắn -->
+        <div id="workerChatMessages" style="height: 300px; overflow-y: auto; padding: 1rem; background: #f8fafc; display: flex; flex-direction: column; gap: 0.75rem;">
+            <!-- Tin nhắn sẽ được API đổ vào đây -->
+        </div>
+
+        <!-- Ô nhập tin nhắn -->
+        <div style="padding: 1rem; background: white; border-top: 1px solid #e2e8f0; display: flex; gap: 0.5rem;">
+            <input type="text" id="workerChatInput" placeholder="Nhập tin nhắn trả lời..." onkeypress="if(event.key==='Enter') sendWorkerMsg()" style="flex: 1; border: 1px solid #cbd5e1; border-radius: 99px; padding: 0.5rem 1rem; font-family: inherit; outline: none;">
+            <button onclick="sendWorkerMsg()" style="background: #1d4ed8; color: white; border: none; border-radius: 99px; padding: 0.5rem 1.2rem; font-weight: 600; cursor: pointer;">Gửi</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentProviderId = null;
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (!userInfoStr) { window.location.href = '/login'; return; }
+        const u = JSON.parse(userInfoStr);
+
+        try {
+            // 1. Tìm Provider ID dựa trên số điện thoại của tài khoản đang đăng nhập
+            const resProv = await fetch('/api/admin/providers');
+            const providers = await resProv.json();
+            const currentProvider = providers.find(p => p.phone === u.phone && p.verified === true);
+
+            if (!currentProvider) {
+                alert("Tài khoản của bạn chưa được duyệt làm thợ!");
+                window.location.href = '/profile';
+                return;
+            }
+
+            currentProviderId = currentProvider.id;
+            
+            // 2. Cập nhật tên và avatar thợ lên Sidebar
+            document.querySelector('.sw-name').innerText = currentProvider.name;
+            if (currentProvider.avatar) {
+                document.querySelector('.sw-avatar').innerHTML = `<img src="${currentProvider.avatar}" style="width:100%; height:100%; border-radius:12px; object-fit:cover;">`;
+            }
+
+            // 3. Tải danh sách đơn hàng thực tế
+            loadOrders();
+
+        } catch (error) { console.error("Lỗi tải thông tin thợ:", error); }
+    });
+
+    // --- HÀM TẢI ĐƠN HÀNG ---
+    // --- HÀM TẢI ĐƠN HÀNG VÀ TÍNH TOÁN THỐNG KÊ ---
+    async function loadOrders() {
+        try {
+            const res = await fetch(`/api/provider/${currentProviderId}/orders`);
+            const orders = await res.json();
+            const container = document.getElementById('ordersList');
+
+            // --- KIỂM TRA THÔNG BÁO LỊCH HẸN SẮP TỚI ---
+            checkUpcomingAppointments(orders);
+
+            // 1. TÍNH TOÁN THỐNG KÊ TỪ DỮ LIỆU THẬT
+            const total = orders.length;
+            const pending = orders.filter(o => o.status === 'pending').length;
+            const inprog = orders.filter(o => o.status === 'accepted' || o.status === 'in_progress').length;
+            const done = orders.filter(o => o.status === 'completed').length;
+            
+            // Tính tổng thu nhập (chỉ cộng dồn những đơn đã 'completed')
+            const income = orders.filter(o => o.status === 'completed').reduce((sum, o) => sum + Number(o.price), 0);
+
+            // 2. ĐIỀN SỐ LIỆU LÊN GIAO DIỆN
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-pending').innerText = pending;
+            document.getElementById('stat-income').innerText = income.toLocaleString('vi-VN') + ' đ';
+            
+            document.getElementById('count-all').innerText = total;
+            document.getElementById('count-pending').innerText = pending;
+            document.getElementById('count-inprog').innerText = inprog;
+            document.getElementById('count-done').innerText = done;
+
+            // 3. HIỂN THỊ DANH SÁCH (Như cũ)
+            if (orders.length === 0) {
+                container.innerHTML = '<p style="text-align:center; padding:2rem; color:#6b7280;">Bạn chưa có đơn hàng nào.</p>';
+                return;
+            }
+
+            container.innerHTML = orders.map(o => {
+                let statusClass = '', statusText = '', actionsHtml = '';
+                
+                if (o.status === 'pending') {
+                    statusClass = 'status-pending'; statusText = '⏳ Chờ xác nhận';
+                    actionsHtml = `
+                        <button class="btn-action btn-accept" onclick="acceptOrder(this, ${o.id})">✅ Nhận đơn</button>
+                        <button class="btn-action btn-directions" onclick="openMap('${o.address ? o.address.replace(/'/g, "\\'") : ''}')">🗺️ Xem bản đồ</button>
+                        <button class="btn-action" style="background:#fee2e2; color:#dc2626;" onclick="rejectOrder(this, ${o.id})">✕ Từ chối</button>
+                    `;
+                } else if (o.status === 'accepted' || o.status === 'in_progress') {
+                    statusClass = 'status-inprog'; statusText = '🛠 Đang thực hiện';
+                    actionsHtml = `
+                        <button class="btn-action" style="background:#eff6ff; color:#1d4ed8; border: 1px solid #bfdbfe;" onclick="openWorkerChat('${o.id}', '${o.customer_name}')">💬 Nhắn tin</button>
+                        <button class="btn-action btn-proof" onclick="document.getElementById('proofModal').classList.add('show')">📸 Chụp minh chứng</button>
+                        <button class="btn-action btn-complete" onclick="completeOrder(this, ${o.id})">✅ Hoàn thành</button>
+                        <button class="btn-action btn-directions" onclick="openMap('${o.address ? o.address.replace(/'/g, "\\'") : ''}')">🗺️ Bản đồ</button>
+                    `;
+                } else if (o.status === 'completed') {
+                    statusClass = 'status-done'; statusText = '✅ Hoàn thành';
+                    actionsHtml = `<button class="btn-action btn-directions" style="background:#f0fdf4; color:#059669;">📸 Đã xem minh chứng</button>`;
+                } else if (o.status === 'cancelled') {
+                    statusClass = 'status-pending'; statusText = '❌ Đã hủy';
+                }
+
+                return `
+                <div class="order-card" data-status="${o.status === 'accepted' ? 'in_progress' : o.status}">
+                    <div class="order-header">
+                        <div>
+                            <div class="order-id">#NTH-2026-${o.id}</div>
+                            <div class="order-date">📅 Hẹn lúc: ${o.time}</div>
+                        </div>
+                        <span class="order-status ${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="order-body">
+                        <div class="order-info">
+                            <div class="oi-row"><span class="oi-key">Dịch vụ:</span><span class="oi-val">${o.service_name} — Gói ${o.package_name}</span></div>
+                            <div class="oi-row"><span class="oi-key">Khách:</span><span class="oi-val">${o.customer_name} · ${o.customer_phone}</span></div>
+                            <div class="oi-row"><span class="oi-key">Địa chỉ:</span><span class="oi-val">${o.address}</span></div>
+                            <div class="oi-row"><span class="oi-key">Thù lao:</span><span class="oi-val" style="color:var(--primary); font-size:1rem;">${Number(o.price).toLocaleString('vi-VN')} đ</span></div>
+                        </div>
+                        <div class="order-actions">
+                            ${actionsHtml}
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+
+        } catch (error) { console.error("Lỗi tải đơn hàng:", error); }
+    }
+
+    // --- HÀM THỢ NHẬN ĐƠN ---
+    async function acceptOrder(btn, bookingId) {
+        if(!confirm(`Xác nhận nhận đơn #${bookingId}?`)) return;
+        try {
+            const res = await fetch(`/api/bookings/${bookingId}/status`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'in_progress' })
+            });
+            if (res.ok) { alert('✅ Nhận đơn thành công!'); loadOrders(); }
+        } catch(e) { alert('Lỗi kết nối Server!'); }
+    }
+    // ================= XỬ LÝ CHAT BÊN THỢ (GỌI API THẬT) =================
+    let workerChatInterval = null;
+    let activeChatBookingId = null;
+
+    function openWorkerChat(bookingId, customerName) {
+        activeChatBookingId = bookingId;
+        document.getElementById('chatCustomerName').innerText = customerName || 'Khách hàng';
+        document.getElementById('chatOrderId').innerText = `Đơn hàng #${bookingId}`;
+        document.getElementById('workerChatModal').style.display = 'flex';
+        
+        loadWorkerChat();
+        // Cứ 3 giây gọi API 1 lần để lấy tin nhắn mới
+        workerChatInterval = setInterval(loadWorkerChat, 3000);
+    }
+
+    function closeWorkerChat() {
+        document.getElementById('workerChatModal').style.display = 'none';
+        clearInterval(workerChatInterval); // Tắt lặp khi đóng chat
+        activeChatBookingId = null;
+    }
+
+    async function loadWorkerChat() {
+        if (!activeChatBookingId) return;
+        try {
+            const res = await fetch(`/api/bookings/${activeChatBookingId}/chat`);
+            if (!res.ok) {
+                console.error('Chat API error:', res.status);
+                return;
+            }
+            const msgs = await res.json();
+            const box = document.getElementById('workerChatMessages');
+            
+            if (msgs.length === 0) {
+                box.innerHTML = '<div style="text-align:center; color:#94a3b8; font-size:0.85rem; margin-top:2rem;">Chưa có tin nhắn nào. Hãy bắt đầu cuộc trò chuyện!</div>';
+                return;
+            }
+            
+            box.innerHTML = msgs.map(m => {
+                const isMe = m.sender_type === 'provider';
+                if (isMe) {
+                    return `
+                    <div style="align-self: flex-end; max-width: 80%; text-align: right;">
+                        <div style="background: #1d4ed8; color: white; padding: 0.6rem 1rem; border-radius: 12px; border-bottom-right-radius: 2px; font-size: 0.9rem; text-align: left;">${m.message}</div>
+                        <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.2rem;">${m.time} - Bạn</div>
+                    </div>`;
+                } else {
+                    return `
+                    <div style="align-self: flex-start; max-width: 80%;">
+                        <div style="background: white; border: 1px solid #e2e8f0; padding: 0.6rem 1rem; border-radius: 12px; border-bottom-left-radius: 2px; font-size: 0.9rem; color: #0f172a;">${m.message}</div>
+                        <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.2rem;">${m.time} - Khách</div>
+                    </div>`;
+                }
+            }).join('');
+            
+            box.scrollTop = box.scrollHeight;
+        } catch (e) { console.error('loadWorkerChat error:', e); }
+    }
+    
+
+    async function sendWorkerMsg() {
+        const input = document.getElementById('workerChatInput');
+        const text = input.value.trim();
+        if (!text || !activeChatBookingId) return;
+
+        // Hiển thị ngay lập tức (optimistic UI)
+        const box = document.getElementById('workerChatMessages');
+        const tempId = 'temp-' + Date.now();
+        const now = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+        box.innerHTML += `
+            <div id="${tempId}" style="align-self: flex-end; max-width: 80%; text-align: right;">
+                <div style="background: #1d4ed8; color: white; padding: 0.6rem 1rem; border-radius: 12px; border-bottom-right-radius: 2px; font-size: 0.9rem; text-align: left; opacity:0.7;">${text}</div>
+                <div style="font-size: 0.7rem; color: #64748b; margin-top: 0.2rem;">${now} - Bạn ⏳</div>
+            </div>`;
+        box.scrollTop = box.scrollHeight;
+        input.value = '';
+
+        try {
+            const res = await fetch(`/api/bookings/${activeChatBookingId}/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sender_type: 'provider', message: text })
+            });
+            if (res.ok) {
+                await loadWorkerChat(); // Tải lại sau khi server xác nhận
+            } else {
+                const err = await res.json();
+                alert('Gửi thất bại: ' + (err.message || res.statusText));
+                // Xóa tin nhắn tạm
+                const tempEl = document.getElementById(tempId);
+                if (tempEl) tempEl.remove();
+                input.value = text; // Khôi phục nội dung
+            }
+        } catch (e) {
+            console.error('sendWorkerMsg error:', e);
+            alert('Không thể kết nối server!');
+        }
+    }
+    // --- HÀM THỢ BÁO HOÀN THÀNH ---
+    async function completeOrder(btn, bookingId) {
+        const hasBefore = document.getElementById('preview-before').style.display === 'block';
+        if(!hasBefore) {
+            alert('⚠️ Vui lòng chụp ảnh minh chứng trước và sau trước khi hoàn thành!');
+            document.getElementById('proofModal').classList.add('show');
+            return;
+        }
+        if(!confirm('Xác nhận hoàn thành dịch vụ này?')) return;
+        try {
+            const res = await fetch(`/api/bookings/${bookingId}/status`, {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'completed' })
+            });
+            if (res.ok) { alert('🎉 Dịch vụ hoàn thành!'); document.getElementById('proofModal').classList.remove('show'); loadOrders(); }
+        } catch(e) { alert('Lỗi kết nối Server!'); }
+    }
+
+    // --- CÁC HÀM TIỆN ÍCH ---
+    async function rejectOrder(btn, bookingId) {
+        if(confirm('Bạn chắc chắn muốn từ chối đơn này? Hệ thống sẽ báo hủy.')) {
+            await fetch(`/api/bookings/${bookingId}/status`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'cancelled' }) });
+            loadOrders();
+        }
+    }
+
+    function toggleStatus(el) { alert(el.checked ? '🟢 Bạn đang sẵn sàng nhận đơn mới!' : '🔴 Bạn đã tắt chế độ nhận đơn.'); }
+    
+    function openMap(address) {
+        if (!address) return;
+        if (address.includes('http')) {
+            const match = address.match(/(https?:\/\/[^\s]+)/);
+            if (match) {
+                window.open(match[0], '_blank');
+                return;
+            }
+        }
+        window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address), '_blank');
+    }
+
+    function triggerUpload(type) { document.getElementById('upload-' + type).click(); }
+    function previewPhoto(input, type) {
+        if(input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const preview = document.getElementById('preview-' + type);
+                preview.querySelector('img').src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function submitProof() {
+        const hasBefore = document.getElementById('preview-before').style.display === 'block';
+        const hasAfter = document.getElementById('preview-after').style.display === 'block';
+        if(!hasBefore || !hasAfter) { alert('Vui lòng tải lên cả ảnh TRƯỚC và ảnh SAU!'); return; }
+        document.getElementById('proofModal').classList.remove('show');
+        alert('✅ Ảnh minh chứng đã được lưu cục bộ! Bạn có thể nhấn "Hoàn thành" để kết thúc dịch vụ.');
+    }
+    function filterOrders(status, btn) {
+        document.querySelectorAll('.order-tab').forEach(t => t.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.order-card').forEach(card => {
+            if(status === 'all') card.style.display = 'block';
+            else card.style.display = card.dataset.status === status ? 'block' : 'none';
+        });
+    }
+    
+    // --- HỆ THỐNG THÔNG BÁO LỊCH HẸN THÔNG MINH ---
+    let notifiedOrders = JSON.parse(sessionStorage.getItem('notifiedOrders') || '[]');
+
+    function checkUpcomingAppointments(orders) {
+        if (Notification.permission !== "granted") return;
+
+        // Chỉ lấy các đơn đã nhận
+        const upcomingOrders = orders.filter(o => o.status === 'accepted' || o.status === 'in_progress');
+        
+        upcomingOrders.forEach(o => {
+            // Tránh spam thông báo liên tục cho cùng 1 đơn hàng
+            if (notifiedOrders.includes(o.id)) return;
+
+            // Kiểm tra xem đơn hàng có phải là hôm nay hoặc ngày mai không (dựa trên chuỗi thời gian)
+            // Giả sử o.time có dạng "10/05/2026 14:30"
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const todayStr = today.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit', year:'numeric'});
+            const tomorrowStr = tomorrow.toLocaleDateString('vi-VN', {day:'2-digit', month:'2-digit', year:'numeric'});
+
+            if (o.time.includes(todayStr) || o.time.includes(tomorrowStr)) {
+                let dayText = o.time.includes(todayStr) ? "HÔM NAY" : "NGÀY MAI";
+                
+                new Notification(`NTDV-home: Lịch hẹn ${dayText}!`, {
+                    body: `Bạn có hẹn Dịch vụ ${o.service_name} lúc ${o.time.split(' ')[1]} với khách ${o.customer_name}. Vui lòng chuẩn bị!`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/3652/3652191.png"
+                });
+                
+                // Lưu lại để không thông báo lại trong phiên làm việc này
+                notifiedOrders.push(o.id);
+                sessionStorage.setItem('notifiedOrders', JSON.stringify(notifiedOrders));
+            }
+        });
+    }
+
+    // Yêu cầu quyền thông báo khi thợ vừa đăng nhập
+    document.addEventListener("DOMContentLoaded", () => {
+        if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+            Notification.requestPermission();
+        }
+    });
+</script>
+</body>
+</html>

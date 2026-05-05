@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang cá nhân - NTDVhome</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        /* Tab switching */
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+    </style>
+</head>
+<body>
+<div class="profile-page-wrapper">
+
+    <!-- ================== HEADER ================== -->
+    <header class="navbar">
+        <a href="/" class="nav-logo">NTDV<span>home</span></a>
+        <nav class="nav-menu">
+            <a href="/" class="nav-link">Trang chủ</a>
+            <a href="/my-orders" class="nav-link" style="color:#0f52ba; font-weight:700;">📋 Đơn của tôi</a>
+            <a href="/#services" class="nav-link">Dịch vụ</a>
+            <button onclick="logout()" class="btn-logout">Đăng xuất</button>
+        </nav>
+    </header>
+
+    <!-- ================== KHUNG TRANG CÁ NHÂN ================== -->
+    <div class="profile-container">
+
+        <!-- SIDEBAR MENU -->
+        <div class="profile-sidebar">
+            <img id="sidebarAvatar" src="https://ui-avatars.com/api/?name=User&background=random" style="width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 10px auto; display: block; object-fit: cover;">
+            <h3 id="displayUserName">Xin chào!</h3>
+
+            <nav>
+                <button class="active" onclick="switchProfileTab('info', this)">👤 Thông tin cá nhân</button>
+                <button onclick="switchProfileTab('history', this)">📝 Lịch sử đặt lịch</button>
+                <button onclick="switchProfileTab('password', this)">🔑 Đổi mật khẩu</button>
+                <!-- NÚT ĐĂNG KÝ THỢ MỚI -->
+                <button id="btnShowRegisterTab" onclick="switchProfileTab('register', this)" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; color: #059669; font-weight: 700;">🛠️ Đăng ký làm thợ</button>
+            </nav>
+        </div>
+        
+        <!-- NỘI DUNG CONTENT -->
+        <div class="profile-content">
+            
+            <!-- TAB 1: THÔNG TIN CÁ NHÂN -->
+            <div id="tab-info" class="tab-pane active">
+                <h2 class="content-title" style="margin-bottom: 2rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 1rem; color: #111827;">Thông tin cá nhân</h2>
+
+                <form id="userProfileForm" onsubmit="event.preventDefault(); updateUserProfile();">
+                    <div class="input-group" style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f9fafb; border-radius: 0.5rem; border: 1px dashed #d1d5db;">
+                        <img id="profileAvatarPreview" src="https://ui-avatars.com/api/?name=User&background=random" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #e5e7eb;">
+                        <div>
+                            <label style="display: block; margin-bottom: 0.25rem; font-weight: 600; color: #374151;">Ảnh đại diện</label>
+                            <input type="file" id="profAvatar" accept="image/*" style="font-size: 0.85rem;" onchange="previewAndUploadAvatar(this)">
+                            <small style="color: #6b7280; display: block; margin-top: 0.25rem;">Khuyên dùng ảnh vuông, kích thước tối đa 2MB</small>
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 1.25rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Họ và tên</label>
+                        <input type="text" id="profName" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit;">
+                    </div>
+
+                    <div class="form-row" style="display: flex; gap: 1.5rem; margin-bottom: 1.25rem;">
+                        <div class="input-group" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Số điện thoại</label>
+                            <input type="tel" id="profPhone" disabled style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; background: #f9fafb; font-family: inherit; color: #6b7280;">
+                        </div>
+                        <div class="input-group" style="flex: 1;">
+                            <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Địa chỉ Email</label>
+                            <input type="email" id="profEmail" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit;">
+                        </div>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 1.25rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Địa chỉ nhà mặc định</label>
+                        <input type="text" id="profAddress" placeholder="VD: 123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit;">
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Giới thiệu bản thân (Sẽ hiển thị trên Cộng đồng)</label>
+                        <textarea id="userBio" rows="3" placeholder="VD: Xin chào, mình là..." style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit; resize: vertical;"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="btnUpdateProfile" style="width: auto; padding: 0.75rem 2rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; font-weight: bold; cursor: pointer;">Lưu Cập Nhật</button>
+                </form>
+
+                <!-- KHU VỰC DÀNH RIÊNG CHO THỢ -->
+                <div id="providerBioSection" style="display: none; margin-top: 3rem; padding-top: 2rem; border-top: 2px solid #e5e7eb;">
+                    <h3 style="color: #111827; margin-bottom: 1.5rem; font-size: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                        💼 Thông tin Đối tác <span style="font-size: 0.85rem; font-weight: normal; color: #6b7280;">(Khách hàng sẽ thấy)</span>
+                    </h3>
+                    
+                    <div class="input-group" style="margin-bottom: 1.5rem;">
+                        <label style="display: block; font-weight: 600; margin-bottom: 0.75rem; color: #374151;">Kinh nghiệm & Kỹ năng của bạn</label>
+                        <textarea id="profBio" rows="4" style="width: 100%; padding: 1rem; border-radius: 0.75rem; border: 1px solid #d1d5db; font-family: inherit; font-size: 0.95rem; line-height: 1.5; resize: vertical;" placeholder="Ví dụ: Thợ sửa điện nước 3 năm kinh nghiệm..."></textarea>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <button type="button" class="btn-submit" style="background: #059669; width: auto; padding: 0.85rem 1.5rem; border: none; color: white; border-radius: 0.5rem; cursor: pointer; font-weight: bold; font-size: 0.95rem;" onclick="updateBio()">Cập nhật Kinh nghiệm</button>
+                        <button type="button" class="btn-submit" style="background: #ef4444; width: auto; padding: 0.85rem 1.5rem; border: none; color: white; border-radius: 0.5rem; cursor: pointer; font-weight: bold; font-size: 0.95rem;" onclick="deactivateProvider()">🛑 Ngừng làm thợ</button>
+                    </div>
+                </div>
+            </div> <!-- ĐÓNG CHUẨN XÁC CHO TAB INFO -->
+
+            <!-- TAB 4: ĐỔI MẬT KHẨU -->
+            <div id="tab-password" class="tab-pane">
+                <h2 class="content-title" style="margin-bottom: 2rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 1rem; color: #111827;">Thay đổi Mật khẩu</h2>
+                
+                <div style="max-width: 500px; display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="input-group">
+                        <label>Mật khẩu hiện tại</label>
+                        <input type="password" id="oldPassword" placeholder="Mật khẩu hiện tại">
+                    </div>
+                    <div class="input-group">
+                        <label>Mật khẩu mới</label>
+                        <input type="password" id="newPassword" placeholder="Mật khẩu mới">
+                    </div>
+                    <div class="input-group">
+                        <label>Xác nhận mật khẩu mới</label>
+                        <input type="password" id="confirmPassword" placeholder="Xác nhận mật khẩu mới">
+                    </div>
+                    <button onclick="handleChangePassword()" class="btn-submit" style="width: auto; padding: 0.75rem 2rem; margin-top: 0.5rem;">
+                        Lưu mật khẩu mới
+                    </button>
+                </div>
+            </div> <!-- ĐÓNG TAB PASSWORD -->
+
+            <!-- TAB 2: LỊCH SỬ ĐẶT LỊCH -->
+            <div id="tab-history" class="tab-pane">
+                <h2 class="content-title" style="margin-bottom: 2rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 1rem; color: #111827;">Đơn đặt dịch vụ gần đây</h2>
+                <div style="overflow-x: auto;">
+                    <table class="history-table" style="width: 100%; border-collapse: collapse; text-align: left; min-width: 600px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #e5e7eb; background: #f9fafb;">
+                                <th style="padding: 1rem; font-weight: 600; color: #374151;">Mã Đơn</th>
+                                <th style="padding: 1rem; font-weight: 600; color: #374151;">Dịch vụ</th>
+                                <th style="padding: 1rem; font-weight: 600; color: #374151;">Lịch hẹn & Địa chỉ</th>
+                                <th style="padding: 1rem; font-weight: 600; color: #374151;">Thợ đảm nhận</th>
+                                <th style="padding: 1rem; font-weight: 600; color: #374151;">Trạng thái</th>
+                                <th style="padding: 1rem; font-weight: 600; color: #374151; text-align: center;">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody">
+                            <tr><td colspan="5" style="text-align: center; color: #6b7280; padding: 2rem;">Đang tải dữ liệu...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div> <!-- ĐÓNG TAB HISTORY -->
+
+            <!-- TAB 3: ĐĂNG KÝ LÀM THỢ -->
+            <div id="tab-register" class="tab-pane">
+                <h2 class="content-title" style="margin-bottom: 1rem; border-bottom: 1px solid #f3f4f6; padding-bottom: 1rem; color: #111827;">Trở thành đối tác của NTDVhome</h2>
+                <p style="color: #6b7280; margin-bottom: 2rem; line-height: 1.5;">Hãy để lại thông tin, chúng tôi sẽ liên hệ và xét duyệt hồ sơ của bạn. Bạn sẽ có cơ hội gia tăng thu nhập với thời gian linh hoạt!</p>
+                
+                <form id="registerProviderForm" style="max-width: 600px;">
+                    <div class="input-group" style="margin-bottom: 1.25rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Số Căn cước công dân (CCCD)</label>
+                        <input type="text" id="regCccd" required placeholder="Nhập đúng 12 số CCCD của bạn" maxlength="12" style="width: 100%; padding: 0.85rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit;">
+                    </div>
+                    
+                    <div class="input-group" style="margin-bottom: 1.25rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Ảnh minh chứng (Mặt trước CCCD hoặc Chứng chỉ nghề)</label>
+                        <input type="file" id="regImage" accept="image/*" required style="width: 100%; padding: 0.6rem; background: #f9fafb; border: 1px dashed #9ca3af; border-radius: 0.5rem; cursor: pointer;">
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 1.25rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Bạn muốn nhận công việc nào?</label>
+                        <select id="regServiceType" required style="width: 100%; padding: 0.85rem; border-radius: 0.5rem; border: 1px solid #d1d5db; font-family: inherit; background: white; cursor: pointer;">
+                            <option value="">-- Vui lòng chọn 1 dịch vụ --</option>
+                            <option value="Dọn dẹp">🧹 Dọn dẹp nhà cửa</option>
+                            <option value="Điện nước">🔧 Sửa điện nước</option>
+                            <option value="Máy lạnh">❄️ Vệ sinh máy lạnh</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom: 2rem;">
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Kinh nghiệm & Kỹ năng (Giới thiệu bản thân)</label>
+                        <input type="text" id="regBio" required placeholder="VD: Đã có 3 năm kinh nghiệm, làm việc tỉ mỉ..." style="width: 100%; padding: 0.85rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-family: inherit;">
+                    </div>
+                    
+                    <button type="submit" class="btn-submit" id="btnRegisterProvider" style="background-color: #059669; width: auto; padding: 0.85rem 2.5rem; border: none; color: white; border-radius: 0.5rem; cursor: pointer; font-weight: bold; font-size: 1rem;">Gửi Hồ Sơ Đăng Ký</button>
+                </form>
+            </div> <!-- ĐÓNG TAB REGISTER -->
+
+        </div> <!-- ĐÓNG PROFILE CONTENT -->
+    </div> <!-- ĐÓNG PROFILE CONTAINER -->
+</div> <!-- ĐÓNG PROFILE PAGE WRAPPER -->
+
+    <!-- ================== JAVASCRIPT ================== -->
+    <script>
+        let currentUserId = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const userInfoStr = localStorage.getItem('userInfo');
+            if (!userInfoStr) { window.location.href = '/login'; return; }
+            
+            const userInfo = JSON.parse(userInfoStr);
+            currentUserId = userInfo.id; 
+            if(!currentUserId) { alert("Phiên đăng nhập cũ. Vui lòng đăng xuất và đăng nhập lại!"); return; }
+
+            document.getElementById('displayUserName').innerText = userInfo.fullName || userInfo.name;
+            loadUserProfile();
+            loadUserBookings();
+        });
+
+        function switchProfileTab(tabId, btnElement) {
+            document.querySelectorAll('.tab-pane').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.profile-sidebar button').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            btnElement.classList.add('active');
+        }
+        
+        async function handleChangePassword() {
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (!oldPassword || !newPassword || !confirmPassword) {
+                alert("Vui lòng điền đầy đủ thông tin!");
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                alert("Mật khẩu mới và xác nhận không khớp nhau!");
+                return;
+            }
+
+            const userInfoStr = localStorage.getItem('userInfo');
+            if (!userInfoStr) {
+                alert("Bạn chưa đăng nhập!");
+                window.location.href = '/login';
+                return;
+            }
+            const u = JSON.parse(userInfoStr);
+
+            try {
+                const res = await fetch(`/api/user/${u.id}/change-password`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        oldPassword: oldPassword,
+                        newPassword: newPassword
+                    })
+                });
+
+                const result = await res.json();
+                
+                if (res.ok) {
+                    alert("✅ " + result.message);
+                    document.getElementById('oldPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    alert("❌ Lỗi: " + result.message);
+                }
+            } catch (e) {
+                console.error("Lỗi:", e);
+                alert("Lỗi kết nối đến máy chủ!");
+            }
+        }
+
+        async function loadUserProfile() {
+            try {
+                const res = await fetch(`/api/user/${currentUserId}`);
+                if(res.ok) {
+                    const data = await res.json();
+                    
+                    if (data.avatar_url) {
+                        document.getElementById('sidebarAvatar').src = data.avatar_url;
+                        document.getElementById('profileAvatarPreview').src = data.avatar_url;
+                    } else if (data.full_name) {
+                        const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.full_name)}&background=random`;
+                        document.getElementById('sidebarAvatar').src = defaultAvatar;
+                        document.getElementById('profileAvatarPreview').src = defaultAvatar;
+                    }
+
+                    document.getElementById('profName').value = data.full_name || '';
+                    document.getElementById('profPhone').value = data.phone_number || '';
+                    document.getElementById('profEmail').value = data.email || '';
+                    document.getElementById('profAddress').value = data.default_address || '';
+                    document.getElementById('userBio').value = data.user_bio || '';
+
+                    // Nếu user này đã đăng ký làm thợ, hiển thị khung sửa Bio và ẩn nút đăng ký
+                    if (data.is_provider) {
+                        document.getElementById('providerBioSection').style.display = 'block';
+                        document.getElementById('profBio').value = data.bio; // Điền kinh nghiệm cũ vào
+                        
+                        const regBtn = document.getElementById('btnShowRegisterTab');
+                        if (regBtn) regBtn.style.display = 'none';
+                    }
+                }
+            } catch (error) { console.error("Lỗi:", error); }
+        }
+
+        // HÀM MỚI: CẬP NHẬT THÔNG TIN CÁ NHÂN & GIỚI THIỆU BẢN THÂN
+        async function updateUserProfile() {
+            const btn = document.getElementById('btnUpdateProfile');
+            btn.textContent = 'Đang lưu...';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`/api/user/${currentUserId}/update-profile`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        full_name: document.getElementById('profName').value.trim(),
+                        email: document.getElementById('profEmail').value.trim(),
+                        default_address: document.getElementById('profAddress').value.trim(),
+                        user_bio: document.getElementById('userBio').value.trim()
+                    })
+                });
+                const result = await res.json();
+                
+                if (res.ok) {
+                    alert('✅ ' + result.message);
+                    localStorage.setItem('userInfo', JSON.stringify(result.user));
+                    document.getElementById('displayUserName').innerText = result.user.name;
+                } else {
+                    alert('❌ Lỗi: ' + result.message);
+                }
+            } catch(e) {
+                alert("Lỗi kết nối server!");
+            } finally {
+                btn.textContent = 'Lưu Cập Nhật';
+                btn.disabled = false;
+            }
+        }
+
+        // HÀM MỚI: TẢI ẢNH ĐẠI DIỆN
+        async function previewAndUploadAvatar(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileAvatarPreview').src = e.target.result;
+                    document.getElementById('sidebarAvatar').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+
+                const formData = new FormData();
+                formData.append('avatar', file);
+
+                try {
+                    const res = await fetch(`/api/user/${currentUserId}/avatar`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const result = await res.json();
+                    if (!res.ok) {
+                        alert('Lỗi: ' + result.message);
+                    }
+                } catch(e) {
+                    alert('Lỗi kết nối server khi tải ảnh!');
+                }
+            }
+        }
+
+        // HÀM MỚI: BẤM NÚT LƯU KINH NGHIỆM TỪ THỢ
+        async function updateBio() {
+            const newBio = document.getElementById('profBio').value.trim();
+            if (!newBio) { alert("Vui lòng nhập kinh nghiệm!"); return; }
+
+            try {
+                const res = await fetch(`/api/user/${currentUserId}/update-bio`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bio: newBio })
+                });
+                const result = await res.json();
+                
+                if (res.ok) {
+                    alert(result.message);
+                } else {
+                    alert('Lỗi: ' + result.message);
+                }
+            } catch(e) {
+                alert("Lỗi kết nối server!");
+            }
+        }
+        // HÀM MỚI: XỬ LÝ XIN NGHỈ LÀM THỢ
+        async function deactivateProvider() {
+            // Hỏi lại cho chắc chắn, nhỡ khách bấm nhầm
+            if(!confirm("Bạn có chắc chắn muốn ngừng làm thợ không?\nHồ sơ của bạn sẽ bị ẩn khỏi hệ thống và bạn sẽ không thể truy cập Kênh Thợ nữa.")) {
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/user/${currentUserId}/deactivate-provider`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const result = await res.json();
+                
+                if (res.ok) {
+                    alert(result.message);
+                    // Tải lại trang web để giao diện quay về như một User bình thường
+                    window.location.reload(); 
+                } else {
+                    alert('Lỗi: ' + result.message);
+                }
+            } catch(e) {
+                alert("Lỗi kết nối server!");
+            }
+        }
+        // --- HÀM TẢI LỊCH SỬ ĐƠN HÀNG ---
+        async function loadUserBookings() {
+            try {
+                const res = await fetch(`/api/user/${currentUserId}/bookings`);
+                if(res.ok) {
+                    const bookings = await res.json();
+                    const tbody = document.getElementById('historyTableBody');
+                    
+                    if(bookings.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #6b7280; padding: 2rem;">Bạn chưa có đơn đặt dịch vụ nào.</td></tr>';
+                        return;
+                    }
+                    
+                    tbody.innerHTML = bookings.map(b => {
+                        let statusColor = '#6b7280';
+                        let actionHtml = ''; 
+                        
+                        // Nếu đơn đang chờ: Hiện cả nút "Chi tiết" và "Hủy đơn" nằm ngang nhau
+                        if(b.status === 'pending') {
+                            statusColor = '#f59e0b';
+                            actionHtml = `
+                                <div style="display: flex; gap: 0.5rem; justify-content: center;">
+                                    <button onclick="window.location.href='/booking?id=${b.id}'" style="background: #e0e7ff; color: #4338ca; border: none; padding: 0.4rem 0.8rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.2s;">Chi tiết</button>
+                                    
+                                    <button onclick="cancelBooking(${b.id})" style="background: #ef4444; color: white; border: none; padding: 0.4rem 0.8rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.8rem; font-weight: bold; transition: 0.2s;">Hủy đơn</button>
+                                </div>
+                            `;
+                        } 
+                        // Nếu đơn ở các trạng thái khác (Đang làm, Hoàn thành, Đã hủy): Chỉ hiện nút "Xem chi tiết" bự
+                        else {
+                            if(b.status === 'accepted' || b.status === 'in_progress') statusColor = '#3b82f6';
+                            if(b.status === 'completed') statusColor = '#10b981';
+                            if(b.status === 'cancelled') statusColor = '#ef4444';
+                            
+                            actionHtml = `
+                                <button onclick="window.location.href='/booking?id=${b.id}'" style="background: #e0e7ff; color: #4338ca; border: none; padding: 0.4rem 0.8rem; border-radius: 0.5rem; cursor: pointer; font-size: 0.8rem; font-weight: bold; width: 100%; transition: 0.2s;">Xem chi tiết</button>
+                            `;
+                        }
+                        
+                        return `
+                        <tr style="border-bottom: 1px solid #e5e7eb;">
+                            <td style="padding: 1rem;"><b>#${b.id}</b></td>
+                            <td style="padding: 1rem; color: #2563eb; font-weight: bold;">${b.service}</td>
+                            <td style="padding: 1rem;">${b.time}<br><small style="color: #6b7280;">${b.address}</small></td>
+                            <td style="padding: 1rem;">${b.provider || 'Đang tìm thợ...'}</td>
+                            <td style="padding: 1rem;"><span class="profile-badge" style="background: ${statusColor}; color: white; padding: 0.3rem 0.6rem; border-radius: 99px; font-size: 0.75rem; font-weight: bold;">${b.status.toUpperCase()}</span></td>
+                            <td style="padding: 1rem; text-align: center; vertical-align: middle;">${actionHtml}</td>
+                        </tr>`;
+                    }).join('');
+                }
+            } catch (error) { console.error("Lỗi:", error); }
+        }
+
+        // --- HÀM MỚI: XỬ LÝ KHI KHÁCH HÀNG BẤM HỦY ĐƠN ---
+        async function cancelBooking(bookingId) {
+            if(!confirm(`Bạn có chắc chắn muốn hủy đơn hàng #${bookingId} không?`)) {
+                return; // Nếu khách chọn Cancel (Hủy bỏ) thì không làm gì cả
+            }
+
+            try {
+                // Gọi API chuyển status thành 'cancelled' (Tái sử dụng API cập nhật trạng thái đơn)
+                const res = await fetch(`/api/bookings/${bookingId}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+
+                const result = await res.json();
+                
+                if (res.ok) {
+                    alert('✅ Đã hủy đơn hàng thành công!');
+                    loadUserBookings(); // Tải lại bảng ngay lập tức để cập nhật UI
+                } else {
+                    alert('Lỗi: ' + (result.message || 'Không thể hủy đơn hàng này.'));
+                }
+            } catch(e) {
+                alert("Lỗi kết nối server!");
+            }
+        }
+        // --- XỬ LÝ NÚT GỬI ĐĂNG KÝ THỢ (HỖ TRỢ GỬI ẢNH) ---
+        document.getElementById('registerProviderForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnRegisterProvider');
+            btn.innerText = 'Đang tải file lên...'; btn.disabled = true;
+
+            // Dùng FormData thay vì JSON để có thể đóng gói File gửi đi
+            const formData = new FormData();
+            formData.append('cccd', document.getElementById('regCccd').value);
+            // Lấy lựa chọn dịch vụ và nội dung giới thiệu
+            const serviceType = document.getElementById('regServiceType').value;
+            const originalBio = document.getElementById('regBio').value;
+            
+            // Ghép lại thành: "[Chuyên: Dọn dẹp] - Đã có 3 năm kinh nghiệm..."
+            const finalBio = `[Chuyên: ${serviceType}] - ${originalBio}`;
+            formData.append('bio', finalBio);
+            
+            const imageFile = document.getElementById('regImage').files[0];
+            if (imageFile) {
+                formData.append('evidence_image', imageFile);
+            }
+
+            try {
+                const response = await fetch(`/api/user/${currentUserId}/register-provider`, {
+                    method: 'POST',
+                    // LƯU Ý QUAN TRỌNG: Tuyệt đối KHÔNG gán headers {'Content-Type': 'application/json'} ở đây
+                    // Trình duyệt sẽ tự động nhận diện FormData và gán header phù hợp để truyền file.
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if(response.ok) {
+                    alert(result.message);
+                    document.getElementById('registerProviderForm').reset();
+                    document.querySelector('.profile-sidebar button').click(); // Quay về tab Thông tin
+                } else {
+                    alert('Lỗi: ' + result.message);
+                }
+            } catch (error) {
+                alert('Không thể kết nối Server!');
+            } finally {
+                btn.innerText = 'Gửi Hồ Sơ Đăng Ký'; btn.disabled = false;
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userInfo');
+            window.location.href = '/';
+        }
+    </script>
+</body>
+</html>

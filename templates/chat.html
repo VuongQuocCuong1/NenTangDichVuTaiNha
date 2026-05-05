@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hộp thư đến - NTDVhome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f52ba; --primary-light: #3b7de8; --accent: #ff6b35;
+            --bg: #f0f4ff; --surface: #ffffff; --text: #0d1b2a;
+            --text-muted: #5a6a7a; --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(15,82,186,0.10);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; height: 68px; flex-shrink: 0;
+            background: rgba(255,255,255,0.97); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border); box-shadow: 0 2px 12px rgba(15,82,186,0.07);
+        }
+        .nav-logo { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .nav-logo span { color: #ff6b35; }
+        .back-btn {
+            display: flex; align-items: center; gap: 0.5rem;
+            color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            padding: 0.5rem 1rem; border-radius: 10px; transition: all 0.2s;
+            border: 1.5px solid var(--border);
+        }
+        .back-btn:hover { background: #eff6ff; color: var(--primary); border-color: var(--primary); }
+
+        .chat-container {
+            display: flex; flex: 1; overflow: hidden; max-width: 1200px; width: 100%; margin: 0 auto;
+            background: white; border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+        }
+
+        /* SIDEBAR LIST */
+        .chat-sidebar {
+            width: 320px; border-right: 1px solid var(--border); display: flex; flex-direction: column;
+            background: #f8fafc; flex-shrink: 0;
+        }
+        .sidebar-header { padding: 1.25rem; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 1.2rem; border-bottom: 1px solid var(--border); background: white; }
+        .conversation-list { flex: 1; overflow-y: auto; }
+        .conv-item {
+            display: flex; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+            cursor: pointer; transition: background 0.2s; align-items: center;
+        }
+        .conv-item:hover, .conv-item.active { background: #eff6ff; }
+        .conv-avatar { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .conv-info { flex: 1; overflow: hidden; }
+        .conv-name { font-weight: 700; margin-bottom: 0.25rem; color: var(--text); }
+        .conv-lastmsg { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* CHAT AREA */
+        .chat-main { flex: 1; display: flex; flex-direction: column; background: white; }
+        .chat-header {
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 1rem;
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(8px);
+        }
+        .chat-header h3 { font-family: 'Sora', sans-serif; font-size: 1.1rem; }
+        .chat-header a { font-size: 0.85rem; color: var(--primary); text-decoration: none; font-weight: 600; }
+        
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
+            background: #f8fafc;
+        }
+        .msg-bubble { max-width: 70%; padding: 0.85rem 1.2rem; border-radius: 16px; font-size: 0.95rem; line-height: 1.5; position: relative; }
+        .msg-mine { background: linear-gradient(135deg, var(--primary), #1a6fd4); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 12px rgba(15,82,186,0.2); }
+        .msg-other { background: white; color: var(--text); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .msg-time { font-size: 0.7rem; margin-top: 0.4rem; opacity: 0.8; text-align: right; }
+        .msg-other .msg-time { text-align: left; color: var(--text-muted); }
+
+        .chat-input-area {
+            padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: white; display: flex; gap: 0.75rem;
+        }
+        .chat-input {
+            flex: 1; padding: 0.85rem 1.25rem; border: 1.5px solid var(--border); border-radius: 99px;
+            font-family: inherit; font-size: 0.95rem; outline: none; transition: border-color 0.2s;
+        }
+        .chat-input:focus { border-color: var(--primary); }
+        .btn-send {
+            width: 46px; height: 46px; border-radius: 50%; border: none; background: var(--primary); color: white;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            transition: transform 0.2s; box-shadow: 0 4px 12px rgba(15,82,186,0.3);
+        }
+        .btn-send:hover { transform: scale(1.05); background: #1a6fd4; }
+
+        .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); }
+        .empty-state svg { width: 80px; height: 80px; margin-bottom: 1rem; opacity: 0.5; color: var(--primary); }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <a href="/" class="nav-logo">NTDV<span>·</span>home</a>
+    <a href="javascript:history.back()" class="back-btn">← Quay lại</a>
+</header>
+
+<div class="chat-container">
+    <div class="chat-sidebar">
+        <div class="sidebar-header">💬 Tin nhắn</div>
+        <div class="conversation-list" id="convList">
+            <div style="padding: 1rem; text-align: center; color: #64748b;">Đang tải...</div>
+        </div>
+    </div>
+
+    <div class="chat-main" id="chatMain" style="display: none;">
+        <div class="chat-header">
+            <div class="conv-avatar" id="currentAvatar">?</div>
+            <div>
+                <h3 id="currentName">Tên người dùng</h3>
+                <a href="#" id="viewProfileLink">Xem hồ sơ cá nhân</a>
+            </div>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-area">
+            <input type="text" id="msgInput" class="chat-input" placeholder="Nhập tin nhắn..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <button class="btn-send" onclick="sendMessage()">➤</button>
+        </div>
+    </div>
+
+    <div class="empty-state" id="emptyState">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        <h3>Chọn một cuộc hội thoại</h3>
+        <p>Bắt đầu trò chuyện để kết nối dễ dàng hơn.</p>
+    </div>
+</div>
+
+<script>
+    let currentUser = null;
+    let currentPartnerId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const userInfoStr = localStorage.getItem('userInfo');
+        if (!userInfoStr) {
+            alert('Vui lòng đăng nhập!');
+            window.location.href = '/login';
+            return;
+        }
+        currentUser = JSON.parse(userInfoStr);
+        
+        // Kiểm tra xem có yêu cầu chat với ai cụ thể qua URL query không (?user_id=123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetUserId = urlParams.get('user_id');
+
+        loadConversations(targetUserId);
+    });
+
+    async function loadConversations(autoSelectId = null) {
+        try {
+            const res = await fetch(`/api/chat/${currentUser.id}/conversations`);
+            const convs = await res.json();
+            const listEl = document.getElementById('convList');
+
+            if (convs.length === 0 && !autoSelectId) {
+                listEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: #64748b; font-size: 0.9rem;">Chưa có tin nhắn nào.<br>Hãy tìm thợ và bắt đầu trò chuyện!</div>';
+                return;
+            }
+
+            // Nếu url yêu cầu chat với người mới chưa có trong list
+            if (autoSelectId && !convs.find(c => c.user_id == autoSelectId)) {
+                // Lấy thông tin user đó để thêm vào đầu danh sách
+                const uRes = await fetch(`/api/user/${autoSelectId}`);
+                if (uRes.ok) {
+                    const uData = await uRes.json();
+                    convs.unshift({
+                        user_id: autoSelectId,
+                        name: uData.full_name,
+                        last_message: 'Bắt đầu trò chuyện...',
+                        last_time: new Date()
+                    });
+                }
+            }
+
+            listEl.innerHTML = convs.map(c => `
+                <div class="conv-item" id="conv-${c.user_id}" onclick="openChat(${c.user_id}, '${c.name.replace(/'/g, "\\'")}')">
+                    <div class="conv-avatar">${c.name.charAt(0).toUpperCase()}</div>
+                    <div class="conv-info">
+                        <div class="conv-name">${c.name}</div>
+                        <div class="conv-lastmsg">${c.last_message || ''}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            if (autoSelectId) {
+                const autoConv = convs.find(c => c.user_id == autoSelectId);
+                if (autoConv) openChat(autoSelectId, autoConv.name);
+            }
+
+        } catch(err) {
+            console.error(err);
+        }
+    }
+
+    async function openChat(partnerId, partnerName) {
+        document.querySelectorAll('.conv-item').forEach(el => el.classList.remove('active'));
+        const activeItem = document.getElementById(`conv-${partnerId}`);
+        if(activeItem) activeItem.classList.add('active');
+
+        currentPartnerId = partnerId;
+        document.getElementById('emptyState').style.display = 'none';
+        document.getElementById('chatMain').style.display = 'flex';
+        
+        document.getElementById('currentName').textContent = partnerName;
+        document.getElementById('currentAvatar').textContent = partnerName.charAt(0).toUpperCase();
+        document.getElementById('viewProfileLink').href = `/user-profile/${partnerId}`;
+
+        await loadMessages();
+    }
+
+    async function loadMessages() {
+        if (!currentPartnerId) return;
+        try {
+            const res = await fetch(`/api/chat/${currentUser.id}/history/${currentPartnerId}`);
+            const messages = await res.json();
+            
+            const msgBox = document.getElementById('chatMessages');
+            
+            if (messages.length === 0) {
+                msgBox.innerHTML = '<div style="text-align:center; color:#94a3b8; margin-top:2rem;">Hãy gửi lời chào đầu tiên! 👋</div>';
+                return;
+            }
+
+            msgBox.innerHTML = messages.map(m => `
+                <div class="msg-bubble ${m.is_mine ? 'msg-mine' : 'msg-other'}">
+                    <div>${escapeHtml(m.text)}</div>
+                    <div class="msg-time">${formatTime(m.time)}</div>
+                </div>
+            `).join('');
+
+            msgBox.scrollTop = msgBox.scrollHeight;
+        } catch(err) { console.error(err); }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('msgInput');
+        const text = input.value.trim();
+        if (!text || !currentPartnerId) return;
+
+        input.value = '';
+
+        // Hiển thị tạm thời tin nhắn lên giao diện
+        const msgBox = document.getElementById('chatMessages');
+        if(msgBox.innerHTML.includes('lời chào đầu tiên')) msgBox.innerHTML = '';
+        msgBox.innerHTML += `
+            <div class="msg-bubble msg-mine" style="opacity: 0.7;">
+                <div>${escapeHtml(text)}</div>
+                <div class="msg-time">Đang gửi...</div>
+            </div>`;
+        msgBox.scrollTop = msgBox.scrollHeight;
+
+        try {
+            const res = await fetch('/api/chat/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sender_id: currentUser.id,
+                    receiver_id: currentPartnerId,
+                    text: text
+                })
+            });
+
+            if (res.ok) {
+                await loadMessages();
+                // Cập nhật lại list bên trái ngầm
+                loadConversations();
+            }
+        } catch(err) {
+            console.error(err);
+            alert('Lỗi gửi tin nhắn!');
+        }
+    }
+
+    function formatTime(isoString) {
+        if (!isoString) return '';
+        const d = new Date(isoString);
+        return d.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'});
+    }
+
+    function escapeHtml(unsafe) {
+        return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+</script>
+</body>
+</html>

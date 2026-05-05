@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ người dùng - NTDVhome</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f52ba; --primary-light: #3b7de8; --accent: #ff6b35;
+            --bg: #f0f4ff; --surface: #ffffff; --text: #0d1b2a;
+            --text-muted: #5a6a7a; --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(15,82,186,0.10);
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); }
+
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; height: 68px;
+            background: rgba(255,255,255,0.97); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border); box-shadow: 0 2px 12px rgba(15,82,186,0.07);
+        }
+        .nav-logo { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .nav-logo span { color: #ff6b35; }
+        .back-btn {
+            display: flex; align-items: center; gap: 0.5rem;
+            color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+            padding: 0.5rem 1rem; border-radius: 10px; transition: all 0.2s;
+            border: 1.5px solid var(--border);
+        }
+        .back-btn:hover { background: #eff6ff; color: var(--primary); border-color: var(--primary); }
+
+        .page-wrapper { max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+
+        /* PROFILE HERO */
+        .profile-hero {
+            background: white; border-radius: 20px; overflow: hidden;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 1.25rem;
+        }
+        .hero-banner {
+            height: 120px;
+            background: linear-gradient(135deg, #0f52ba 0%, #1a6fd4 50%, #00c896 100%);
+            position: relative;
+        }
+        .hero-content { padding: 0 2rem 2rem; }
+        .avatar-wrapper {
+            margin-top: -3rem; margin-bottom: 1rem;
+            width: 80px; height: 80px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 2rem;
+            border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .profile-name { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 700; margin-bottom: 0.35rem; }
+        .profile-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.3rem 0.8rem; border-radius: 99px; font-size: 0.8rem; font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        .badge-provider { background: #ecfdf5; color: #059669; border: 1px solid #6ee7b7; }
+        .badge-user { background: #eff6ff; color: var(--primary); border: 1px solid #93c5fd; }
+        .badge-verified { background: #fef9c3; color: #d97706; border: 1px solid #fcd34d; }
+        .profile-bio { color: var(--text-muted); font-size: 0.95rem; line-height: 1.65; }
+
+        /* STATS ROW */
+        .stats-row {
+            display: flex; gap: 1.5rem; margin-top: 1.25rem;
+            padding-top: 1.25rem; border-top: 1px solid var(--border);
+        }
+        .stat-box { text-align: center; }
+        .stat-val { font-family: 'Sora', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--primary); }
+        .stat-lbl { font-size: 0.78rem; color: var(--text-muted); }
+
+        /* ACTION BUTTONS */
+        .action-card {
+            background: white; border-radius: 16px; padding: 1.5rem;
+            box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 1.25rem;
+        }
+        .action-card h3 { font-family: 'Sora', sans-serif; font-size: 1rem; margin-bottom: 1rem; color: var(--text); }
+        .action-btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+        .btn-book {
+            flex: 1; min-width: 140px;
+            background: linear-gradient(135deg, #0f52ba, #1a6fd4);
+            color: white; border: none; border-radius: 12px;
+            padding: 0.85rem 1.5rem; font-family: inherit; font-weight: 700; font-size: 0.95rem;
+            cursor: pointer; transition: all 0.2s; text-align: center; text-decoration: none;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(15,82,186,0.3);
+        }
+        .btn-book:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(15,82,186,0.4); }
+        .btn-chat {
+            flex: 1; min-width: 140px;
+            background: white; color: var(--primary); border: 2px solid var(--primary);
+            border-radius: 12px; padding: 0.85rem 1.5rem; font-family: inherit; font-weight: 700; font-size: 0.95rem;
+            cursor: pointer; transition: all 0.2s; text-align: center; text-decoration: none;
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-chat:hover { background: #eff6ff; }
+
+        /* SERVICE SELECT */
+        .service-select {
+            width: 100%; padding: 0.75rem 1rem; margin-bottom: 1rem;
+            border: 1.5px solid var(--border); border-radius: 10px;
+            font-family: inherit; font-size: 0.95rem; color: var(--text);
+            background: #f8faff; cursor: pointer; outline: none; transition: border-color 0.2s;
+        }
+        .service-select:focus { border-color: var(--primary); }
+
+        /* REVIEWS */
+        .review-card { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: var(--shadow); border: 1px solid var(--border); }
+        .review-item {
+            padding: 1rem 0; border-bottom: 1px solid #f1f5f9;
+            animation: fadeIn 0.3s ease;
+        }
+        .review-item:last-child { border-bottom: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .review-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+        .review-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #ec4899); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+        .review-name { font-weight: 700; font-size: 0.9rem; }
+        .review-stars { color: #fbbf24; font-size: 0.85rem; }
+        .review-text { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; }
+        .empty-reviews { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.9rem; }
+
+        /* SKELETON LOADER */
+        .skeleton { background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .loading-box { background: white; border-radius: 20px; padding: 2rem; box-shadow: var(--shadow); border: 1px solid var(--border); margin-bottom: 1.25rem; }
+    </style>
+</head>
+<body>
+
+<header class="navbar">
+    <a href="/" class="nav-logo">NTDV<span>·</span>home</a>
+    <a href="javascript:history.back()" class="back-btn">← Quay lại</a>
+</header>
+
+<div class="page-wrapper">
+    <!-- SKELETON LOADING -->
+    <div id="loadingState" class="loading-box">
+        <div class="skeleton" style="width:80px;height:80px;border-radius:50%;margin-bottom:1rem;"></div>
+        <div class="skeleton" style="width:200px;height:24px;margin-bottom:0.75rem;"></div>
+        <div class="skeleton" style="width:300px;height:16px;margin-bottom:0.5rem;"></div>
+        <div class="skeleton" style="width:250px;height:16px;"></div>
+    </div>
+
+    <!-- MAIN CONTENT (ẩn khi đang load) -->
+    <div id="mainContent" style="display:none;">
+
+        <!-- PROFILE CARD -->
+        <div class="profile-hero">
+            <div class="hero-banner"></div>
+            <div class="hero-content">
+                <div class="avatar-wrapper" id="profileAvatar">?</div>
+                <h1 class="profile-name" id="profileName">Đang tải...</h1>
+                <div id="profileBadges"></div>
+                <p class="profile-bio" id="profileBio"></p>
+                <div class="stats-row" id="statsRow" style="display:none;">
+                    <div class="stat-box">
+                        <div class="stat-val" id="statRating">5.0</div>
+                        <div class="stat-lbl">⭐ Đánh giá TB</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="statReviews">0</div>
+                        <div class="stat-lbl">💬 Đánh giá</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-val" id="statStatus">Rảnh</div>
+                        <div class="stat-lbl">🟢 Trạng thái</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ACTION BUTTONS (chỉ hiện nếu không phải chính mình) -->
+        <div class="action-card" id="actionCard" style="display:none;">
+            <div id="bookingSection" style="display:none; margin-bottom: 1rem;">
+                <h3>🛠️ Đặt dịch vụ với thợ này</h3>
+                <select class="service-select" id="serviceSelect">
+                    <option value="">-- Chọn loại dịch vụ --</option>
+                    <option value="cleaning">🧹 Dọn dẹp nhà cửa</option>
+                    <option value="electric">🔧 Sửa điện nước</option>
+                    <option value="aircon">❄️ Vệ sinh máy lạnh</option>
+                </select>
+                <button class="btn-book" style="width: 100%; margin-bottom: 1rem;" onclick="bookProvider()">📅 Đặt lịch ngay</button>
+            </div>
+            
+            <button class="btn-chat" style="width: 100%;" onclick="chatProvider()">💬 Nhắn tin trò chuyện</button>
+        </div>
+
+        <!-- ĐÁNH GIÁ -->
+        <div class="review-card" id="reviewCard" style="display:none;">
+            <h3 style="font-family:'Sora',sans-serif; margin-bottom:1rem; font-size:1rem;">⭐ Đánh giá từ khách hàng</h3>
+            <div id="reviewList"></div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Lấy userId từ URL: /user-profile/123
+    const userId = window.location.pathname.split('/').pop();
+    let profileData = null;
+    let currentUser = null;
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        const stored = localStorage.getItem('userInfo');
+        if (stored) currentUser = JSON.parse(stored);
+
+        await loadProfile();
+    });
+
+    async function loadProfile() {
+        try {
+            // Lấy thông tin cơ bản user
+            const res = await fetch(`/api/user/${userId}`);
+            if (!res.ok) { showError('Không tìm thấy người dùng này!'); return; }
+            const user = await res.json();
+            profileData = user;
+
+            // Hiện thị thông tin cơ bản
+            const name = user.full_name || 'Người dùng';
+            document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+            document.getElementById('profileName').textContent = name;
+
+            // Badges
+            let badges = '';
+            if (user.is_provider) {
+                badges += '<span class="profile-badge badge-provider">🛠️ Thợ đối tác</span> ';
+                badges += '<span class="profile-badge badge-verified">✅ Đã xác minh CCCD</span>';
+                document.getElementById('statsRow').style.display = 'flex';
+            } else {
+                badges += '<span class="profile-badge badge-user">👤 Người dùng</span>';
+            }
+            document.getElementById('profileBadges').innerHTML = badges;
+
+            // Bio
+            let bioText = user.bio || '';
+            if (bioText.includes('] - ')) bioText = bioText.split('] - ').slice(1).join('] - ');
+            
+            // Nếu không có bio thợ thì dùng user_bio, hoặc gộp cả 2
+            let displayBio = bioText;
+            if (user.user_bio) {
+                displayBio = displayBio ? (user.user_bio + "\n\n" + displayBio) : user.user_bio;
+            }
+            
+            document.getElementById('profileBio').innerText = displayBio || 'Chưa có thông tin giới thiệu.';
+
+            // Hiển thị action card nếu không phải chính mình
+            const isMe = currentUser && currentUser.id == userId;
+            if (!isMe) {
+                document.getElementById('actionCard').style.display = 'block';
+            }
+
+            // Nếu là thợ thì hiển thị nút đặt lịch và tải thêm dữ liệu thợ
+            if (user.is_provider) {
+                if (!isMe) document.getElementById('bookingSection').style.display = 'block';
+                await loadProviderDetails();
+            }
+
+            // Ẩn skeleton, hiện nội dung
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+
+        } catch (err) {
+            console.error(err);
+            showError('Không thể tải thông tin người dùng!');
+        }
+    }
+
+    async function loadProviderDetails() {
+        try {
+            const res = await fetch(`/api/public/providers/${userId}`);
+            if (!res.ok) return;
+            const data = await res.json();
+
+            document.getElementById('statRating').textContent = data.avg_rating;
+            document.getElementById('statReviews').textContent = data.review_count;
+
+            await loadReviews();
+        } catch(err) { 
+            console.error(err);
+            // Fallback load reviews even if provider stats fail
+            await loadReviews();
+        }
+    }
+
+    async function loadReviews() {
+        try {
+            const res = await fetch(`/api/user/${userId}/public-reviews`);
+            if (!res.ok) return;
+            const reviews = await res.json();
+            const listEl = document.getElementById('reviewList');
+            const card = document.getElementById('reviewCard');
+
+            card.style.display = 'block';
+
+            if (!reviews.length) {
+                listEl.innerHTML = '<div class="empty-reviews">⭐ Chưa có đánh giá nào</div>';
+                return;
+            }
+
+            listEl.innerHTML = reviews.map(r => {
+                const name = r.User ? r.User.full_name : 'Khách hàng';
+                const stars = '★'.repeat(r.rating_star) + '☆'.repeat(5 - r.rating_star);
+                return `
+                <div class="review-item">
+                    <div class="review-header">
+                        <div class="review-avatar">${name.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <div class="review-name">${name}</div>
+                            <div class="review-stars">${stars}</div>
+                        </div>
+                    </div>
+                    <div class="review-text">${r.comment || 'Không có nhận xét.'}</div>
+                </div>`;
+            }).join('');
+        } catch(err) { console.error(err); }
+    }
+
+    function bookProvider() {
+        const service = document.getElementById('serviceSelect').value;
+        if (!service) { alert('Vui lòng chọn loại dịch vụ!'); return; }
+        // Chuyển đến trang đặt dịch vụ với thợ đã được chọn sẵn
+        window.location.href = `/service/${service}?provider_id=${userId}`;
+    }
+
+    function chatProvider() {
+        if (!currentUser) {
+            alert('Vui lòng đăng nhập để nhắn tin!');
+            window.location.href = '/login';
+            return;
+        }
+        window.location.href = `/chat?user_id=${userId}`;
+    }
+
+    function showError(msg) {
+        document.getElementById('loadingState').innerHTML = `
+            <div style="text-align:center; padding:2rem; color:#ef4444;">
+                <div style="font-size:3rem;margin-bottom:1rem;">😕</div>
+                <h3>${msg}</h3>
+                <a href="/community" style="color:var(--primary);text-decoration:none;font-weight:600;margin-top:1rem;display:inline-block;">← Quay lại Cộng đồng</a>
+            </div>`;
+    }
+</script>
+</body>
+</html>

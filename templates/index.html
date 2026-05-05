@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NTDVhome - Nền tảng Dịch vụ Tại nhà</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f52ba;
+            --primary-light: #3b7de8;
+            --primary-dark: #0a3d8f;
+            --accent: #ff6b35;
+            --accent-2: #00c896;
+            --surface: #ffffff;
+            --bg: #f0f4ff;
+            --text: #0d1b2a;
+            --text-muted: #5a6a7a;
+            --border: #e2e8f0;
+            --shadow: 0 4px 24px rgba(15,82,186,0.10);
+            --shadow-lg: 0 16px 48px rgba(15,82,186,0.18);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: block;
+            align-items: unset;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 5%; height: 70px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 2px 12px rgba(15,82,186,0.07);
+        }
+
+        .nav-logo {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.5rem; font-weight: 700;
+            color: var(--primary); text-decoration: none;
+            display: flex; align-items: center; gap: 0.4rem;
+        }
+        .nav-logo .dot { color: var(--accent); font-size: 2rem; line-height: 1; margin-top: -4px; }
+
+        .nav-menu { display: flex; align-items: center; gap: 2rem; }
+        .nav-link { color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-link:hover { color: var(--primary); }
+
+        #authButtons { display: flex; align-items: center; gap: 0.75rem; }
+        .btn-login { padding: 0.5rem 1.25rem; border: 1.5px solid var(--primary); border-radius: 8px; color: var(--primary); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-login:hover { background: var(--primary); color: white; }
+        .btn-register { padding: 0.5rem 1.25rem; background: var(--primary); border-radius: 8px; color: white; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.2s; }
+        .btn-register:hover { background: var(--primary-dark); }
+        .btn-logout-nav { padding: 0.5rem 1.25rem; background: #fee2e2; border: none; border-radius: 8px; color: #dc2626; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+        .btn-logout-nav:hover { background: #dc2626; color: white; }
+
+        /* ===== HERO ===== */
+        .hero {
+            background: linear-gradient(135deg, #0f52ba 0%, #1a6fd4 50%, #0d3d8a 100%);
+            padding: 5rem 5% 4rem;
+            position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .hero-inner { position: relative; max-width: 800px; margin: 0 auto; text-align: center; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 99px; padding: 0.4rem 1rem;
+            color: #bfdbfe; font-size: 0.85rem; font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+        .hero-title {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700; color: white;
+            line-height: 1.2; margin-bottom: 1rem;
+        }
+        .hero-title span { color: #fbbf24; }
+        .hero-sub { color: #bfdbfe; font-size: 1.1rem; margin-bottom: 2.5rem; }
+
+        /* Search box */
+        .search-box {
+            background: white;
+            border-radius: 16px;
+            padding: 1rem;
+            display: flex; gap: 0.75rem; align-items: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 680px; margin: 0 auto 1.5rem;
+        }
+        .search-box-inner {
+            flex: 1; display: flex; align-items: center; gap: 0.75rem;
+            background: #f8faff; border: 1.5px solid #e2e8f0;
+            border-radius: 10px; padding: 0.75rem 1rem;
+        }
+        .search-box-inner svg { color: var(--text-muted); flex-shrink: 0; }
+        .search-box-inner input {
+            border: none; background: transparent; outline: none;
+            font-size: 1rem; font-family: inherit; color: var(--text);
+            width: 100%;
+        }
+        .search-box-inner input::placeholder { color: #94a3b8; }
+        .btn-search {
+            background: var(--accent); color: white;
+            border: none; border-radius: 10px;
+            padding: 0.85rem 1.75rem; font-weight: 700;
+            font-size: 0.95rem; cursor: pointer; font-family: inherit;
+            white-space: nowrap; transition: all 0.2s;
+        }
+        .btn-search:hover { background: #e85c26; transform: scale(1.03); }
+
+        .hero-tags { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+        .hero-tag {
+            background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+            color: #dbeafe; padding: 0.35rem 0.85rem; border-radius: 99px;
+            font-size: 0.82rem; cursor: pointer; transition: all 0.2s;
+        }
+        .hero-tag:hover { background: rgba(255,255,255,0.25); color: white; }
+
+        /* ===== STATS BAR ===== */
+        .stats-bar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 5%;
+            display: flex; justify-content: center; gap: 3rem; flex-wrap: wrap;
+        }
+        .stat-item { display: flex; align-items: center; gap: 0.75rem; }
+        .stat-num { font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* ===== SECTIONS ===== */
+        .section { padding: 4rem 5%; max-width: 1280px; margin: 0 auto; }
+        .section-label {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            color: var(--primary); font-weight: 600; font-size: 0.85rem;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            margin-bottom: 0.75rem;
+        }
+        .section-label::before { content: ''; width: 24px; height: 3px; background: var(--primary); border-radius: 2px; }
+        .section-title { font-family: 'Sora', sans-serif; font-size: 2rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+        .section-sub { color: var(--text-muted); font-size: 1rem; margin-bottom: 2.5rem; }
+
+        /* ===== 3 SERVICE CATEGORIES ===== */
+        .categories-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        @media (max-width: 768px) { .categories-grid { grid-template-columns: 1fr; } }
+
+        .category-card {
+            position: relative; border-radius: 20px; overflow: hidden;
+            cursor: pointer; transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+            text-decoration: none; display: block;
+            box-shadow: var(--shadow);
+        }
+        .category-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+
+        .category-card .card-bg {
+            height: 220px;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            padding: 1.75rem;
+            position: relative;
+        }
+        .category-card .card-bg::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+        }
+        .category-card .card-emoji {
+            position: absolute; top: 1.5rem; right: 1.5rem;
+            font-size: 3rem; z-index: 1;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+        .category-card .card-content { position: relative; z-index: 1; }
+        .category-card .card-name {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.35rem; font-weight: 700; color: white;
+            margin-bottom: 0.25rem;
+        }
+        .category-card .card-sub { color: rgba(255,255,255,0.8); font-size: 0.85rem; }
+        .category-card .card-badge {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3);
+            color: white; padding: 0.3rem 0.75rem; border-radius: 99px;
+            font-size: 0.75rem; font-weight: 600; margin-top: 0.75rem;
+        }
+
+        .cat-cleaning .card-bg { background: linear-gradient(135deg, #1a6fd4, #0f52ba); }
+        .cat-electric .card-bg { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .cat-aircon .card-bg { background: linear-gradient(135deg, #06b6d4, #0891b2); }
+
+        .category-card .card-footer {
+            background: white; padding: 1.25rem 1.75rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .card-price { font-weight: 700; color: var(--primary); font-size: 0.95rem; }
+        .card-arrow {
+            width: 36px; height: 36px; background: var(--bg);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: var(--primary); font-size: 1.1rem; transition: all 0.2s;
+        }
+        .category-card:hover .card-arrow { background: var(--primary); color: white; }
+
+        /* ===== FEATURED / PROMOTED ===== */
+        .featured-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+        .featured-card {
+            background: white; border-radius: 16px; padding: 1.5rem;
+            border: 1px solid var(--border); transition: all 0.25s;
+            cursor: pointer; position: relative; overflow: hidden;
+        }
+        .featured-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); border-color: var(--primary-light); }
+        .featured-card .promoted-tag {
+            position: absolute; top: 1rem; right: 1rem;
+            background: linear-gradient(135deg, #ff6b35, #e85c26);
+            color: white; font-size: 0.7rem; font-weight: 700;
+            padding: 0.25rem 0.6rem; border-radius: 99px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .fc-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .fc-avatar {
+            width: 52px; height: 52px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.75rem;
+        }
+        .fc-info h4 { font-weight: 700; color: var(--text); font-size: 1rem; margin-bottom: 0.2rem; }
+        .fc-info p { color: var(--text-muted); font-size: 0.82rem; }
+        .fc-stars { display: flex; gap: 0.1rem; color: #fbbf24; font-size: 0.85rem; margin-bottom: 0.75rem; }
+        .fc-stars span { color: var(--text-muted); font-size: 0.8rem; margin-left: 0.35rem; }
+        .fc-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .fc-tag {
+            background: #eff6ff; color: var(--primary);
+            padding: 0.25rem 0.65rem; border-radius: 99px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+        .fc-price { color: var(--primary); font-weight: 700; font-size: 0.95rem; }
+        .fc-btn {
+            width: 100%; margin-top: 1rem;
+            background: var(--primary); color: white;
+            border: none; border-radius: 10px; padding: 0.7rem;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .fc-btn:hover { background: var(--primary-dark); }
+
+        /* ===== HOW IT WORKS ===== */
+        .how-section { background: white; }
+        .steps-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 1rem; position: relative;
+        }
+        @media (max-width: 768px) { .steps-grid { grid-template-columns: 1fr 1fr; } }
+        .steps-grid::before {
+            content: '';
+            position: absolute; top: 32px; left: 12%; right: 12%;
+            height: 2px; background: linear-gradient(to right, var(--primary), var(--accent));
+            z-index: 0;
+        }
+        @media (max-width: 768px) { .steps-grid::before { display: none; } }
+        .step-item { text-align: center; padding: 1.5rem 1rem; position: relative; z-index: 1; }
+        .step-num {
+            width: 64px; height: 64px; border-radius: 50%;
+            background: white; border: 3px solid var(--primary);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-family: 'Sora', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--primary);
+            box-shadow: 0 0 0 6px #eff6ff;
+        }
+        .step-icon { font-size: 1.75rem; margin-bottom: 1rem; }
+        .step-title { font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+        .step-desc { color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; }
+
+        /* ===== TRUST SECTION ===== */
+        .trust-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        @media (max-width: 768px) { .trust-grid { grid-template-columns: 1fr; } }
+        .trust-card {
+            background: white; border-radius: 16px; padding: 2rem;
+            border: 1px solid var(--border); display: flex; gap: 1.25rem;
+        }
+        .trust-icon {
+            width: 52px; height: 52px; border-radius: 14px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+        }
+        .trust-card h4 { font-weight: 700; margin-bottom: 0.4rem; }
+        .trust-card p { color: var(--text-muted); font-size: 0.875rem; line-height: 1.6; }
+
+        /* ===== FOOTER CTA ===== */
+        .cta-section {
+            background: linear-gradient(135deg, #0f52ba, #1a6fd4);
+            padding: 4rem 5%; text-align: center; color: white;
+        }
+        .cta-section h2 { font-family: 'Sora', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+        .cta-section p { color: #bfdbfe; margin-bottom: 2rem; font-size: 1.05rem; }
+        .cta-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .cta-btn-primary {
+            background: var(--accent); color: white;
+            padding: 0.85rem 2rem; border-radius: 10px;
+            font-weight: 700; font-size: 1rem; border: none; cursor: pointer; font-family: inherit;
+            transition: all 0.2s; text-decoration: none; display: inline-block;
+        }
+        .cta-btn-primary:hover { background: #e85c26; transform: scale(1.04); }
+        .cta-btn-secondary {
+            background: rgba(255,255,255,0.15); color: white;
+            padding: 0.85rem 2rem; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.35);
+            font-weight: 700; font-size: 1rem; cursor: pointer; font-family: inherit;
+            transition: all 0.2s; text-decoration: none; display: inline-block;
+        }
+        .cta-btn-secondary:hover { background: rgba(255,255,255,0.25); }
+
+        /* Search suggestions */
+        .search-suggestions {
+            display: none; position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+            background: white; border-radius: 12px; box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border); z-index: 50; overflow: hidden;
+        }
+        .search-suggestions.show { display: block; }
+        .suggestion-item {
+            padding: 0.85rem 1.25rem; cursor: pointer; display: flex; gap: 0.75rem;
+            align-items: center; font-size: 0.9rem;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+        .suggestion-item:last-child { border-bottom: none; }
+        .suggestion-item:hover { background: #f8faff; }
+        .search-wrap { position: relative; flex: 1; }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+    <a href="/" class="nav-logo">NTDV<span class="dot">·</span>home</a>
+    <nav class="nav-menu">
+        <a href="/" class="nav-link">Trang chủ</a>
+        <a href="#categories" class="nav-link">Dịch vụ</a>
+        <a href="/community" class="nav-link">💬 Cộng đồng</a>
+        <a href="#how" class="nav-link">Cách hoạt động</a>
+        <a href="/profile" class="nav-link">Trở thành thợ</a>
+    </nav>
+    <div id="authButtons">
+        <a href="/login" class="btn-login">Đăng nhập</a>
+        <a href="/register" class="btn-register">Đăng ký</a>
+    </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-inner">
+        <div class="hero-badge">
+            <span>⚡</span>
+            Thợ đến trong 30 phút — Đảm bảo chất lượng
+        </div>
+        <h1 class="hero-title">
+            Dịch vụ tại nhà<br><span>uy tín, nhanh chóng</span>
+        </h1>
+        <p class="hero-sub">Đặt thợ lành nghề chỉ trong vài bước — Sửa chữa, dọn dẹp, bảo trì ngay hôm nay</p>
+
+        <div class="search-box">
+            <div class="search-wrap">
+                <div class="search-box-inner">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" id="mainSearch" placeholder="Bạn cần dịch vụ gì? VD: Vệ sinh máy lạnh..." autocomplete="off">
+                </div>
+                <div class="search-suggestions" id="searchSuggestions">
+                    <div class="suggestion-item" onclick="goTo('/service/cleaning')">🧹 <span>Dọn dẹp nhà cửa</span></div>
+                    <div class="suggestion-item" onclick="goTo('/service/electric')">🔧 <span>Sửa điện nước</span></div>
+                    <div class="suggestion-item" onclick="goTo('/service/aircon')">❄️ <span>Vệ sinh máy lạnh</span></div>
+                    <div class="suggestion-item" onclick="goTo('/service/cleaning')">🧺 <span>Giặt ủi tại nhà</span></div>
+                </div>
+            </div>
+            <button class="btn-search" onclick="handleSearch()">🔍 Tìm ngay</button>
+        </div>
+
+        <div class="hero-tags">
+            <span class="hero-tag" onclick="goTo('/service/cleaning')">🧹 Dọn nhà</span>
+            <span class="hero-tag" onclick="goTo('/service/electric')">🔧 Sửa điện nước</span>
+            <span class="hero-tag" onclick="goTo('/service/aircon')">❄️ Vệ sinh máy lạnh</span>
+            <span class="hero-tag">🪟 Lau kính</span>
+            <span class="hero-tag">🪣 Thông cống</span>
+        </div>
+    </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+    <div class="stat-item">
+        <div>
+            <div class="stat-num">12,000+</div>
+            <div class="stat-label">Đơn hoàn thành</div>
+        </div>
+    </div>
+    <div class="stat-item">
+        <div>
+            <div class="stat-num">850+</div>
+            <div class="stat-label">Thợ lành nghề</div>
+        </div>
+    </div>
+    <div class="stat-item">
+        <div>
+            <div class="stat-num">4.9 ⭐</div>
+            <div class="stat-label">Đánh giá trung bình</div>
+        </div>
+    </div>
+    <div class="stat-item">
+        <div>
+            <div class="stat-num">15 quận</div>
+            <div class="stat-label">Phủ sóng TP.HCM</div>
+        </div>
+    </div>
+</div>
+
+<!-- 3 SERVICE CATEGORIES -->
+<div class="section" id="categories">
+    <div class="section-label">Danh mục dịch vụ</div>
+    <h2 class="section-title">3 nhóm dịch vụ chính</h2>
+    <p class="section-sub">Chọn nhóm dịch vụ bạn cần — thợ xung quanh sẽ nhận ngay</p>
+
+    <div class="categories-grid">
+        <!-- Dọn dẹp nhà cửa -->
+        <a href="/service/cleaning" class="category-card cat-cleaning">
+            <div class="card-bg">
+                <div class="card-emoji">🧹</div>
+                <div class="card-content">
+                    <div class="card-name">Dọn dẹp nhà cửa</div>
+                    <div class="card-sub">Phòng ngủ, phòng khách, bếp, nhà tắm...</div>
+                    <div class="card-badge">⚡ Đặt ngay hoặc đặt lịch trước</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="card-price">Từ 150.000 đ/buổi</div>
+                <div class="card-arrow">→</div>
+            </div>
+        </a>
+
+        <!-- Sửa điện nước -->
+        <a href="/service/electric" class="category-card cat-electric">
+            <div class="card-bg">
+                <div class="card-emoji">🔧</div>
+                <div class="card-content">
+                    <div class="card-name">Sửa điện nước</div>
+                    <div class="card-sub">Điện, ống nước, thông cống, lắp đặt...</div>
+                    <div class="card-badge">⚡ Đặt ngay hoặc đặt lịch trước</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="card-price">Từ 100.000 đ/lần</div>
+                <div class="card-arrow">→</div>
+            </div>
+        </a>
+
+        <!-- Vệ sinh máy lạnh -->
+        <a href="/service/aircon" class="category-card cat-aircon">
+            <div class="card-bg">
+                <div class="card-emoji">❄️</div>
+                <div class="card-content">
+                    <div class="card-name">Vệ sinh máy lạnh</div>
+                    <div class="card-sub">Rửa máy lạnh, bơm ga, sửa chữa...</div>
+                    <div class="card-badge">⚡ Đặt ngay hoặc đặt lịch trước</div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="card-price">Từ 200.000 đ/máy</div>
+                <div class="card-arrow">→</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- FEATURED / PROMOTED WORKERS -->
+<div style="background: #f8faff; padding: 0.5rem 0;">
+<div class="section">
+    <div class="section-label">Nổi bật & Đề xuất</div>
+    <h2 class="section-title">Thợ uy tín được đề xuất</h2>
+    <p class="section-sub">Những thợ có đánh giá cao nhất, được khách hàng tin chọn nhiều nhất</p>
+
+    <div class="featured-grid" id="featuredGrid">
+        <!-- Dữ liệu sẽ được load từ API -->
+        <div id="loadingFeatured" style="text-align: center; width: 100%; color: var(--text-muted); padding: 2rem;">Đang tải danh sách...</div>
+    </div>
+</div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="how-section">
+<div class="section" id="how">
+    <div style="text-align:center">
+        <div class="section-label" style="justify-content:center; display:inline-flex;">Quy trình</div>
+        <h2 class="section-title">Chỉ 4 bước đơn giản</h2>
+        <p class="section-sub">Từ đặt lịch đến hoàn thành dịch vụ, mọi thứ đều minh bạch</p>
+    </div>
+
+    <div class="steps-grid">
+        <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-icon">📍</div>
+            <div class="step-title">Nhập địa chỉ</div>
+            <div class="step-desc">Nhập địa chỉ của bạn, chọn loại dịch vụ và thời gian phù hợp</div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-icon">👷</div>
+            <div class="step-title">Chọn thợ</div>
+            <div class="step-desc">Xem danh sách thợ gần bạn, đánh giá & giá cả, chọn thợ ưng ý</div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-icon">🛠️</div>
+            <div class="step-title">Thực hiện dịch vụ</div>
+            <div class="step-desc">Thợ đến đúng giờ, ghi ảnh trước/sau, minh bạch toàn bộ quá trình</div>
+        </div>
+        <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-icon">⭐</div>
+            <div class="step-title">Đánh giá & thanh toán</div>
+            <div class="step-desc">Xác nhận hoàn thành, đánh giá thợ và thanh toán tiện lợi</div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- TRUST SECTION -->
+<div class="section">
+    <div style="text-align:center">
+        <div class="section-label" style="justify-content:center; display:inline-flex;">Cam kết của chúng tôi</div>
+        <h2 class="section-title">Tại sao chọn NTDVhome?</h2>
+        <p class="section-sub" style="margin-bottom:2rem">Chúng tôi đặt sự hài lòng của bạn lên hàng đầu</p>
+    </div>
+
+    <div class="trust-grid">
+        <div class="trust-card">
+            <div class="trust-icon" style="background:#eff6ff;">🔍</div>
+            <div>
+                <h4>Thợ đã xác minh CCCD</h4>
+                <p>Tất cả thợ đều được kiểm tra lý lịch, có CCCD và chứng chỉ nghề trước khi lên nền tảng.</p>
+            </div>
+        </div>
+        <div class="trust-card">
+            <div class="trust-icon" style="background:#f0fdf4;">💰</div>
+            <div>
+                <h4>Giá cố định, không phát sinh</h4>
+                <p>Bạn biết chính xác mình sẽ trả bao nhiêu trước khi đặt — không có phí ẩn.</p>
+            </div>
+        </div>
+        <div class="trust-card">
+            <div class="trust-icon" style="background:#fffbeb;">📸</div>
+            <div>
+                <h4>Ảnh minh chứng trước/sau</h4>
+                <p>Thợ chụp ảnh trước và sau khi hoàn thành — bảo vệ quyền lợi cả hai bên.</p>
+            </div>
+        </div>
+        <div class="trust-card">
+            <div class="trust-icon" style="background:#fdf2f8;">🛡️</div>
+            <div>
+                <h4>Bảo đảm hoàn tiền</h4>
+                <p>Nếu dịch vụ không đạt chất lượng, chúng tôi cam kết hoàn tiền hoặc làm lại.</p>
+            </div>
+        </div>
+        <div class="trust-card">
+            <div class="trust-icon" style="background:#ecfeff;">💬</div>
+            <div>
+                <h4>Chat trực tiếp với thợ</h4>
+                <p>Nhắn tin riêng để trao đổi yêu cầu cụ thể trước và trong khi thực hiện dịch vụ.</p>
+            </div>
+        </div>
+        <div class="trust-card">
+            <div class="trust-icon" style="background:#fff7ed;">⏰</div>
+            <div>
+                <h4>Nhắc lịch tự động</h4>
+                <p>Hệ thống nhắc bạn và thợ trước 1 ngày — không bao giờ bỏ lỡ lịch hẹn.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA FOOTER -->
+<div class="cta-section">
+    <h2>Trở thành thợ đối tác ngay hôm nay</h2>
+    <p>Tăng thu nhập với lịch làm việc linh hoạt — Nhận đơn ngay khu vực của bạn</p>
+    <div class="cta-btns">
+        <a href="/profile" class="cta-btn-primary">🛠️ Đăng ký làm thợ</a>
+        <a href="#categories" class="cta-btn-secondary">Xem các dịch vụ</a>
+    </div>
+</div>
+
+<script>
+    // Auth state
+    document.addEventListener("DOMContentLoaded", async function() {
+        const userInfoStr = localStorage.getItem('userInfo');
+        const authButtons = document.getElementById('authButtons');
+        
+        if (userInfoStr) {
+            const u = JSON.parse(userInfoStr);
+            
+            // Mặc định là link Quản lý cá nhân và Chat
+            let links = `
+                <a href="/chat" class="nav-link">💬 Tin nhắn</a>
+                <a href="/profile" class="nav-link" style="color:var(--primary);">Quản lý</a>`;
+            
+            // Nếu là Admin
+            if (u.role === 'admin') {
+                links = `<a href="/admin" class="nav-link" style="color:#dc2626;font-weight:bold;">⚙️ Quản trị Admin</a>`;
+            } 
+            else {
+                // Kiểm tra xem user này có phải là thợ đã được duyệt không bằng cách gọi API
+                try {
+                    const res = await fetch('/api/admin/providers');
+                    const providers = await res.json();
+                    // Tìm xem user hiện tại có trong danh sách thợ không và đã được duyệt (verified) chưa
+                    const isWorker = providers.find(p => p.phone === u.phone && p.verified === true);
+                    
+                    if (isWorker) {
+                        // Nếu đúng là thợ, thêm nút Kênh Thợ
+                        links = `
+                            <a href="/chat" class="nav-link">💬 Tin nhắn</a>
+                            <a href="/worker/orders" class="btn-login" style="background:#f59e0b; color:white; border:none;">🛠️ Kênh Thợ</a>
+                            <a href="/profile" class="nav-link">Cá nhân</a>
+                        `;
+                    }
+                } catch(e) { console.log(e); }
+            }
+
+            authButtons.innerHTML = `
+                <span style="color:#4b5563;font-weight:500;">Chào, <b>${u.fullName || u.name}</b></span>
+                ${links}
+                <button onclick="logout()" class="btn-logout-nav">Đăng xuất</button>
+            `;
+        }
+    });
+    function logout() {
+        if(confirm('Bạn có chắc muốn đăng xuất?')) {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userInfo');
+            window.location.reload();
+        }
+    }
+
+    function goTo(url) { window.location.href = url; }
+
+    // Search
+    const searchInput = document.getElementById('mainSearch');
+    const suggestions = document.getElementById('searchSuggestions');
+
+    searchInput.addEventListener('input', function() {
+        suggestions.classList.toggle('show', this.value.length > 0);
+    });
+    searchInput.addEventListener('focus', function() {
+        if (this.value.length > 0) suggestions.classList.add('show');
+    });
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.search-box')) suggestions.classList.remove('show');
+    });
+
+    function handleSearch() {
+        const q = searchInput.value.toLowerCase();
+        if (q.includes('lạnh') || q.includes('điều hòa')) goTo('/service/aircon');
+        else if (q.includes('điện') || q.includes('nước') || q.includes('ống')) goTo('/service/electric');
+        else if (q.includes('dọn') || q.includes('nhà') || q.includes('vệ sinh')) goTo('/service/cleaning');
+        else if (q) alert('Tìm kiếm: ' + q);
+    }
+    searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') handleSearch(); });
+
+    // Lấy danh sách thợ đề xuất & quảng cáo
+    async function loadFeaturedProviders() {
+        try {
+            const res = await fetch('/api/featured-providers');
+            if(res.ok) {
+                const data = await res.json();
+                const grid = document.getElementById('featuredGrid');
+                if(data.length === 0) {
+                    grid.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; color: var(--text-muted);">Hiện chưa có thợ nào được đề xuất.</p>';
+                    return;
+                }
+                
+                grid.innerHTML = data.map(fp => {
+                    const tagHtml = fp.badge ? `<div class="promoted-tag">${fp.badge}</div>` : '';
+                    const starsHtml = '★'.repeat(Math.round(fp.rating)) + '☆'.repeat(5 - Math.round(fp.rating));
+                    const tagsArray = fp.tags ? fp.tags.split(',').map(t => t.trim()).filter(t => t) : [];
+                    const tagsHtml = tagsArray.map(t => `<span class="fc-tag">${t}</span>`).join('');
+                    
+                    return `
+                    <div class="featured-card" onclick="goTo('/provider-detail?fp_id=${fp.id}')">
+                        ${tagHtml}
+                        <div class="fc-header">
+                            <div class="fc-avatar" style="background:#eff6ff;">${fp.avatar_icon || '👷'}</div>
+                            <div class="fc-info">
+                                <h4>${fp.provider_name}</h4>
+                                <p>${fp.description}</p>
+                            </div>
+                        </div>
+                        <div class="fc-stars">${starsHtml} <span>(${fp.review_count} đánh giá)</span></div>
+                        <div class="fc-tags">
+                            ${tagsHtml}
+                        </div>
+                        <div class="fc-price">${fp.price_text}</div>
+                        <button class="fc-btn">Đặt dịch vụ ngay</button>
+                    </div>
+                    `;
+                }).join('');
+            }
+        } catch(e) {
+            console.error('Lỗi khi tải thợ đề xuất:', e);
+        }
+    }
+    // Gọi khi trang vừa tải
+    document.addEventListener("DOMContentLoaded", () => {
+        loadFeaturedProviders();
+    });
+</script>
+</body>
+</html>

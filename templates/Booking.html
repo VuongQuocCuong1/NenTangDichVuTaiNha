@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theo dõi đơn hàng - NTDVhome</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        /* GIỮ NGUYÊN CSS GỐC CỦA BẠN VÌ NÓ QUÁ ĐẸP RỒI */
+        :root {
+            --primary: #0f52ba;
+            --primary-light: #3b7de8;
+            --accent: #ff6b35;
+            --accent-2: #00c896;
+            --surface: #ffffff;
+            --bg: #f0f4ff;
+            --text: #0d1b2a;
+            --text-muted: #5a6a7a;
+            --border: #e2e8f0;
+            --shadow: 0 4px 24px rgba(15, 82, 186, 0.10);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            display: block;
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 5%;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-logo {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-logo .dot {
+            color: #ff6b35;
+        }
+
+        .page-wrap {
+            max-width: 720px;
+            margin: 2.5rem auto;
+            padding: 0 5%;
+        }
+
+        /* Progress Steps */
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 2.5rem;
+        }
+
+        .progress-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .step-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .step-circle.done {
+            background: var(--accent-2);
+            color: white;
+        }
+
+        .step-circle.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 4px rgba(15, 82, 186, 0.2);
+        }
+
+        .step-circle.pending {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .step-text {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+            white-space: nowrap;
+        }
+
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            max-width: 60px;
+            margin-bottom: 22px;
+        }
+
+        .step-line.done {
+            background: var(--accent-2);
+        }
+
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            margin-bottom: 1.25rem;
+        }
+
+        .card-title {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: space-between;
+        }
+
+        /* Worker info card */
+        .worker-info {
+            display: flex;
+            gap: 1.25rem;
+            align-items: flex-start;
+            padding: 1.25rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #eff6ff, #f0f4ff);
+            border: 1.5px solid #bfdbfe;
+        }
+
+        .worker-avatar-lg {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .worker-details h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .worker-details .meta {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .worker-details .stars {
+            color: #fbbf24;
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .worker-contact-btns {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-btn {
+            padding: 0.45rem 0.9rem;
+            border-radius: 8px;
+            border: none;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-call {
+            background: #d1fae5;
+            color: #059669;
+            text-decoration: none;
+        }
+
+        .btn-call:hover {
+            background: #059669;
+            color: white;
+        }
+
+        .btn-cancel-sm {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn-cancel-sm:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        /* Info rows */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        @media (max-width: 500px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-item {
+            background: #f8faff;
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .info-item .label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.4rem;
+        }
+
+        .info-item .value {
+            font-weight: 700;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .info-item .value.highlight {
+            color: var(--primary);
+        }
+
+        /* Status timeline */
+        .status-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 19px;
+            top: 40px;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        .timeline-dot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .dot-done {
+            background: var(--accent-2);
+            color: white;
+        }
+
+        .dot-active {
+            background: var(--primary);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .dot-pending {
+            background: #f1f5f9;
+            border: 2px solid var(--border);
+            color: #94a3b8;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(15, 82, 186, 0.4)
+            }
+
+            50% {
+                box-shadow: 0 0 0 8px rgba(15, 82, 186, 0)
+            }
+        }
+
+        .timeline-content h4 {
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            font-size: 0.95rem;
+        }
+
+        .timeline-content p {
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        /* Rating */
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+
+        .star-btn {
+            font-size: 2.5rem;
+            cursor: pointer;
+            transition: transform 0.1s;
+            filter: grayscale(100%);
+            opacity: 0.4;
+        }
+
+        .star-btn.active {
+            filter: none;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .rating-input {
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            width: 100%;
+            outline: none;
+            resize: vertical;
+            min-height: 80px;
+            margin-bottom: 1rem;
+        }
+
+        .btn-submit-rating {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 0.85rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        /* Alert badges */
+        .alert-bar {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+            font-size: 0.88rem;
+            color: #92400e;
+            margin-bottom: 1.25rem;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Chat box */
+        .chat-box {
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .chat-messages {
+            height: 220px;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: #f8faff;
+        }
+
+        .msg {
+            max-width: 75%;
+        }
+
+        .msg-them {
+            align-self: flex-start;
+        }
+
+        .msg-me {
+            align-self: flex-end;
+        }
+
+        .msg-bubble {
+            padding: 0.65rem 1rem;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        .msg-them .msg-bubble {
+            background: white;
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-me .msg-bubble {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .msg-time {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+            padding: 0 0.25rem;
+        }
+
+        .msg-me .msg-time {
+            text-align: right;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            padding: 0.65rem 1rem;
+            font-family: inherit;
+            font-size: 0.9rem;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+        }
+
+        .chat-send {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: 0.2s;
+        }
+
+        .chat-send:hover {
+            background: #0a3d8f;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <a href="/" class="nav-logo">NTDV<span class="dot">·</span>home</a>
+        <a href="/profile" style="color:var(--text-muted); text-decoration:none; font-size:0.95rem; font-weight:600;">←
+            Quay lại Hồ sơ</a>
+    </header>
+
+    <div class="page-wrap">
+        <!-- PROGRESS -->
+        <div class="progress-bar">
+            <div class="progress-step">
+                <div class="step-circle done">✓</div>
+                <div class="step-text">Chọn dịch vụ</div>
+            </div>
+            <div class="step-line done"></div>
+            <div class="progress-step">
+                <div class="step-circle done">✓</div>
+                <div class="step-text">Chọn thợ</div>
+            </div>
+            <div class="step-line done"></div>
+            <div class="progress-step">
+                <div class="step-circle active">3</div>
+                <div class="step-text">Đang thực hiện</div>
+            </div>
+            <div class="step-line"></div>
+            <div class="progress-step">
+                <div class="step-circle pending">4</div>
+                <div class="step-text">Hoàn thành</div>
+            </div>
+        </div>
+
+        <!-- ALERT -->
+        <div class="alert-bar" id="alertBar">
+            ⏳ <span>Hệ thống đang xử lý đơn hàng của bạn. Vui lòng chờ...</span>
+        </div>
+
+        <!-- CHI TIẾT ĐƠN -->
+        <div class="card">
+            <div class="card-title">
+                <span>📋 Chi tiết đặt lịch</span>
+                <span id="badgeStatus" class="status-badge" style="background: #64748b;">ĐANG TẢI</span>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="label">Mã đơn hàng</div>
+                    <div class="value highlight" id="info-id">#...</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Dịch vụ</div>
+                    <div class="value" id="info-service">...</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Gói</div>
+                    <div class="value" id="info-pkg">...</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Tổng tiền</div>
+                    <div class="value highlight" style="font-size:1.1rem;" id="info-price">... đ</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Ngày giờ hẹn</div>
+                    <div class="value" id="info-time" style="font-size:0.85rem;">...</div>
+                </div>
+                <div class="info-item">
+                    <div class="label">Địa chỉ</div>
+                    <div class="value" id="info-addr" style="font-size:0.85rem; line-height:1.4;">...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- THÔNG TIN THỢ (Mặc định ẩn) -->
+        <div class="card" id="workerCard" style="display: none;">
+            <div class="card-title">👷 Thợ đảm nhận đơn hàng của bạn</div>
+            <div class="worker-info">
+                <div class="worker-avatar-lg" id="prov-avatar">🧑‍🔧</div>
+                <div class="worker-details" style="flex:1;">
+                    <h3 id="prov-name">Đang tải...</h3>
+                    <div class="meta" id="prov-bio">Chuyên gia hệ thống</div>
+                    <div class="stars">★★★★★ (Hệ thống xác thực)</div>
+                    <div class="worker-contact-btns">
+                        <a href="#" class="contact-btn btn-call" id="prov-phone">📞 Gọi điện</a>
+                        <button class="contact-btn btn-chat" style="background: #eff6ff; color: var(--primary);"
+                            onclick="showChat()">💬 Nhắn tin</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TRẠNG THÁI -->
+        <div class="card" id="timelineCard">
+            <div class="card-title">
+                <span>📡 Trạng thái đơn hàng</span>
+                <button class="contact-btn btn-cancel-sm" id="btnCancelOrder" onclick="cancelBooking()"
+                    style="display: none;">✕ Huỷ đơn</button>
+            </div>
+            <div class="status-timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot" id="dot-1">1</div>
+                    <div class="timeline-content">
+                        <h4 id="title-1">Đang tìm thợ</h4>
+                        <p>Hệ thống đang phát thông báo đến các thợ gần bạn.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot dot-pending" id="dot-2">2</div>
+                    <div class="timeline-content">
+                        <h4 id="title-2" style="color: var(--text-muted);">Thợ đã nhận đơn</h4>
+                        <p>Thợ xác nhận và đang chuẩn bị di chuyển.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot dot-pending" id="dot-3">3</div>
+                    <div class="timeline-content">
+                        <h4 id="title-3" style="color: var(--text-muted);">Đang thực hiện</h4>
+                        <p>Thợ đang tiến hành công việc tại nhà bạn.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot dot-pending" id="dot-4">4</div>
+                    <div class="timeline-content">
+                        <h4 id="title-4" style="color: var(--text-muted);">Hoàn thành</h4>
+                        <p>Dịch vụ kết thúc thành công.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- CHAT (Mặc định ẩn, bấm nút mới hiện) -->
+        <div class="card" id="chatCard" style="display:none;">
+            <div class="card-title">💬 Nhắn tin với thợ</div>
+            <div class="chat-box">
+                <div class="chat-messages" id="chatMessages">
+                    <div style="text-align:center;color:#94a3b8;font-size:0.85rem;padding:1rem;">Đang tải tin nhắn...</div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" class="chat-input" id="chatMsgInput" placeholder="Nhắn tin với thợ..."
+                        onkeypress="if(event.key==='Enter')sendMsg()">
+                    <button class="chat-send" onclick="sendMsg()">Gửi</button>
+                </div>
+            </div>
+        </div>
+        <!-- ĐÁNH GIÁ (Hiện sau khi hoàn thành) -->
+        <div class="card" id="ratingCard" style="display:none;">
+            <div class="card-title">⭐ Đánh giá dịch vụ</div>
+            <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:0.5rem;">Chia sẻ trải nghiệm của bạn để
+                giúp thợ và cộng đồng</p>
+            <div class="rating-stars" id="ratingStars">
+                <span class="star-btn" onclick="setRating(1)">⭐</span>
+                <span class="star-btn" onclick="setRating(2)">⭐</span>
+                <span class="star-btn" onclick="setRating(3)">⭐</span>
+                <span class="star-btn active" onclick="setRating(4)">⭐</span>
+                <span class="star-btn active" onclick="setRating(5)">⭐</span>
+            </div>
+            <textarea class="rating-input" id="ratingText"
+                placeholder="Nhận xét của bạn về thợ... (Thái độ, chất lượng, đúng giờ...)"></textarea>
+            <button class="btn-submit-rating" onclick="submitRating()">Gửi đánh giá</button>
+        </div>
+
+    </div>
+
+    <!-- SCRIPT GIAO TIẾP VỚI DATABASE -->
+    <script>
+        let currentBookingId = null;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const params = new URLSearchParams(window.location.search);
+            currentBookingId = params.get('id');
+
+            if (!currentBookingId) {
+                alert("Không tìm thấy mã đơn hàng");
+                window.location.href = '/profile';
+                return;
+            }
+
+            try {
+                // Lấy dữ liệu từ Backend
+                const res = await fetch(`/api/bookings/${currentBookingId}`);
+                if (!res.ok) { alert("Lỗi tải đơn hàng"); window.location.href = '/profile'; return; }
+                const data = await res.json();
+
+                // 1. Điền thông tin Đơn hàng
+                document.getElementById('info-id').innerText = `#NTH-${data.id}`;
+                document.getElementById('info-service').innerText = data.service_name || '—';
+                document.getElementById('info-pkg').innerText = data.package_name || '—';
+                document.getElementById('info-addr').innerText = data.address || 'Chưa có địa chỉ';
+                document.getElementById('info-price').innerText =
+                    data.total_price ? Number(data.total_price).toLocaleString('vi-VN') + ' đ' : '—';
+                document.getElementById('info-time').innerText = data.time || '—';
+
+                // 2. Điền thông tin Thợ (Nếu có)
+                if (data.provider && data.status !== 'cancelled') {
+                    document.getElementById('workerCard').style.display = 'block';
+                    document.getElementById('prov-name').innerText = data.provider.name;
+                    document.getElementById('prov-bio').innerText = data.provider.bio || 'Đối tác chuyên nghiệp';
+                    document.getElementById('prov-phone').href = `tel:${data.provider.phone}`;
+
+                    if (data.provider.avatar) {
+                        document.getElementById('prov-avatar').innerHTML = `<img src="${data.provider.avatar}" style="width:100%; height:100%; object-fit:cover;">`;
+                    }
+                }
+
+                // 3. Xử lý Giao diện Timeline & Trạng thái
+                updateStatusUI(data.status);
+
+            } catch (e) { console.log(e); }
+        });
+
+        function updateStatusUI(status) {
+            const badge = document.getElementById('badgeStatus');
+            const alertBar = document.getElementById('alertBar');
+            const btnCancel = document.getElementById('btnCancelOrder');
+
+            const d1 = document.getElementById('dot-1'), t1 = document.getElementById('title-1');
+            const d2 = document.getElementById('dot-2'), t2 = document.getElementById('title-2');
+            const d3 = document.getElementById('dot-3'), t3 = document.getElementById('title-3');
+            const d4 = document.getElementById('dot-4'), t4 = document.getElementById('title-4');
+
+            if (status === 'pending') {
+                badge.innerText = 'ĐANG TÌM THỢ'; badge.style.background = '#f59e0b';
+                alertBar.innerHTML = `⏳ <span>Hệ thống đang phát thông báo tìm thợ. Vui lòng giữ điện thoại.</span>`;
+                btnCancel.style.display = 'block';
+                d1.className = 'timeline-dot dot-active'; d1.innerText = '🔍';
+                t1.style.color = 'var(--primary)';
+            }
+            else if (status === 'accepted') {
+                badge.innerText = 'THỢ ĐÃ NHẬN'; badge.style.background = '#3b82f6';
+                alertBar.innerHTML = `👷 <span>Thợ đã nhận đơn và sẽ liên hệ với bạn sớm nhất.</span>`;
+                d1.className = 'timeline-dot dot-done'; d1.innerText = '✓';
+                d2.className = 'timeline-dot dot-active'; d2.innerText = '🛵';
+                t2.style.color = 'var(--primary)';
+                // Tự động mở chat
+                openChat();
+            }
+            else if (status === 'in_progress') {
+                badge.innerText = 'ĐANG THỰC HIỆN'; badge.style.background = '#0ea5e9';
+                alertBar.innerHTML = `🛠 <span>Thợ đang tiến hành công việc.</span>`;
+                d1.className = 'timeline-dot dot-done'; d1.innerText = '✓';
+                d2.className = 'timeline-dot dot-done'; d2.innerText = '✓';
+                d3.className = 'timeline-dot dot-active'; d3.innerText = '⚙️';
+                t3.style.color = 'var(--primary)';
+                // Tự động mở chat
+                openChat();
+            }
+            else if (status === 'completed') {
+                badge.innerText = 'ĐÃ HOÀN THÀNH'; badge.style.background = '#10b981';
+                alertBar.style.display = 'none';
+                document.getElementById('ratingCard').style.display = 'block';
+                d1.className = 'timeline-dot dot-done'; d1.innerText = '✓';
+                d2.className = 'timeline-dot dot-done'; d2.innerText = '✓';
+                d3.className = 'timeline-dot dot-done'; d3.innerText = '✓';
+                d4.className = 'timeline-dot dot-done'; d4.innerText = '🎉';
+                t4.style.color = 'var(--primary)';
+            }
+            else if (status === 'cancelled') {
+                badge.innerText = 'ĐÃ HỦY'; badge.style.background = '#ef4444';
+                alertBar.style.background = '#fee2e2'; alertBar.style.borderColor = '#fca5a5'; alertBar.style.color = '#dc2626';
+                alertBar.innerHTML = `❌ <span>Đơn hàng đã bị hủy.</span>`;
+                document.getElementById('timelineCard').style.display = 'none';
+            }
+        }
+
+        // Mở chat và bắt đầu polling
+        function openChat() {
+            const card = document.getElementById('chatCard');
+            card.style.display = 'block';
+            loadChatMessages();
+            if (!chatInterval) {
+                chatInterval = setInterval(loadChatMessages, 3000);
+            }
+        }
+
+        // --- HỦY ĐƠN HÀNG API ---
+        async function cancelBooking() {
+            if (!confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?')) return;
+            try {
+                const res = await fetch(`/api/bookings/${currentBookingId}/status`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+                if (res.ok) {
+                    alert('Đã hủy đơn hàng thành công!');
+                    window.location.reload();
+                } else { alert('Lỗi không thể hủy đơn.'); }
+            } catch (e) { alert("Lỗi server!"); }
+        }
+
+        // ================= ĐÁNH GIÁ (GỌI API THẬT) =================
+        let selectedRating = 4;
+        function setRating(n) {
+            selectedRating = n;
+            document.querySelectorAll('.star-btn').forEach((s, i) => s.classList.toggle('active', i < n));
+        }
+
+        async function submitRating() {
+            const textInput = document.getElementById('ratingText');
+            const text = textInput ? textInput.value.trim() : '';
+
+            if (!selectedRating || selectedRating === 0) {
+                alert('Vui lòng chọn số sao trước khi gửi đánh giá!');
+                return;
+            }
+
+            if (!text) {
+                alert('Vui lòng nhập nhận xét của bạn!');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        booking_id: currentBookingId,
+                        stars: selectedRating,
+                        comment: text
+                    })
+                });
+
+                if (res.ok) {
+                    // Hiển thị thông báo thành công và ẩn form đi
+                    document.getElementById('ratingCard').innerHTML = '<div style="text-align:center; padding:1.5rem; color:#059669; font-weight:700;">✅ Cảm ơn bạn đã đánh giá! Hệ thống đã ghi nhận.</div>';
+                } else {
+                    alert('Lỗi: Không thể gửi đánh giá!');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Lỗi kết nối đến Server!');
+            }
+        }
+
+        // --- HIỂN THỊ KHUNG CHAT ---
+        // Biến để lưu tiến trình lặp (Polling)
+        let chatInterval = null;
+
+        function showChat() {
+            const card = document.getElementById('chatCard');
+            if (card.style.display === 'none') {
+                card.style.display = 'block';
+                card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                // Khi mở chat, tải tin nhắn ngay và lặp lại mỗi 3 giây
+                loadChatMessages();
+                chatInterval = setInterval(loadChatMessages, 3000);
+            } else {
+                card.style.display = 'none';
+                clearInterval(chatInterval); // Tắt lặp khi đóng chat
+            }
+        }
+
+        async function loadChatMessages() {
+            if (!currentBookingId) return;
+            try {
+                const res = await fetch(`/api/bookings/${currentBookingId}/chat`);
+                if (!res.ok) { console.error('Chat API lỗi:', res.status); return; }
+                const msgs = await res.json();
+                const box = document.getElementById('chatMessages');
+
+                if (!msgs.length) {
+                    box.innerHTML = '<div style="text-align:center;color:#94a3b8;font-size:0.85rem;padding:1rem;">Chưa có tin nhắn. Hãy nhắn tin với thợ!</div>';
+                    return;
+                }
+
+                box.innerHTML = msgs.map(m => {
+                    const isMe = m.sender_type === 'customer';
+                    return `
+                <div class="msg ${isMe ? 'msg-me' : 'msg-them'}">
+                    <div class="msg-bubble">${m.message}</div>
+                    <div class="msg-time">${m.time} ${!isMe ? '· Thợ' : ''}</div>
+                </div>`;
+                }).join('');
+
+                box.scrollTop = box.scrollHeight;
+            } catch (e) { console.error('loadChatMessages error:', e); }
+        }
+
+        async function sendMsg() {
+            const input = document.getElementById('chatMsgInput');
+            const text = input.value.trim();
+            if (!text) return;
+            if (!currentBookingId) { alert('Không xác định được đơn hàng!'); return; }
+
+            // Hiển thị ngay (Optimistic UI)
+            const box = document.getElementById('chatMessages');
+            const now = new Date().toLocaleTimeString('vi-VN', {hour:'2-digit', minute:'2-digit'});
+            const tempId = 'tmp-' + Date.now();
+            box.innerHTML += `
+                <div id="${tempId}" class="msg msg-me">
+                    <div class="msg-bubble" style="opacity:0.7">${text}</div>
+                    <div class="msg-time">⏳ ${now}</div>
+                </div>`;
+            box.scrollTop = box.scrollHeight;
+            input.value = '';
+
+            try {
+                const res = await fetch(`/api/bookings/${currentBookingId}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sender_type: 'customer', message: text })
+                });
+
+                if (res.ok) {
+                    await loadChatMessages();
+                } else {
+                    const err = await res.json();
+                    alert('Gửi thất bại: ' + (err.detail || err.message));
+                    document.getElementById(tempId)?.remove();
+                    input.value = text;
+                }
+            } catch (e) {
+                console.error('sendMsg error:', e);
+                alert('Không thể kết nối server!');
+                document.getElementById(tempId)?.remove();
+                input.value = text;
+            }
+        }
+    </script>
+</body>
+
+</html>
