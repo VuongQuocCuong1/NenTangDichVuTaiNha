@@ -273,9 +273,22 @@ python app.py
 ---
 
 ## 👥 Phân Công Nhóm
+Vương Quốc Cường	
+Trưởng nhóm / Backend Developer:
+• Thiết kế kiến trúc hệ thống và Cơ sở dữ liệu (MySQL).
+• Xây dựng Backend bằng Python (Flask) và phát triển các RESTful API.
+• Xử lý logic cốt lõi (Đặt lịch, thuật toán tìm thợ, phân quyền Admin).
 
-| Thành viên | Vai trò | Phụ trách chính |
-|---|---|---|
-| **Thành viên 1** | Trưởng nhóm · Backend & Database | `app.py` (toàn bộ API), Models (SQLAlchemy), Database, `.env`, API Auth/Admin/Booking/Wallet |
-| **Thành viên 2** | Frontend · Customer & UX | `templates/index.html`, `login`, `register`, `profile`, `myorders`, `Booking`, `community`, `chat`, `Service*.html`, `static/style.css` |
-| **Thành viên 3** | Provider Dashboard · Admin · Tài liệu | `templates/Worker*.html`, `admin.html`, kết nối API vào giao diện thợ, `TaiLieu/` (báo cáo, slide, poster) |
+Bùi Thị Như Thảo	
+Frontend Developer / Tester:
+• Thiết kế UI/UX và cắt giao diện bằng HTML5/CSS3/Vanilla JS
+• Ghép nối API từ Backend lên giao diện người dùng.
+• Xây dựng kịch bản kiểm thử (Test Cases) và thực hiện kiểm thử hộp đen.
+
+Chen Woei Haur	
+Business Analyst / Documentation:
+• Phân tích yêu cầu nghiệp vụ và vẽ các sơ đồ hệ thống (Use Case, Activity Diagram).
+• Hỗ trợ thiết kế Database và thu thập dữ liệu mẫu.
+• Soạn thảo tài liệu báo cáo tổng kết đồ án và thiết kế Slide thuyết trình.
+
+
